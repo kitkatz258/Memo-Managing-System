@@ -14,9 +14,9 @@ Route::get('/dashboard', function () {
 
 Route::middleware(['auth'])->group(function(){
     Route::get('/memos', [MemoController::class, 'index'])->name('memos.index');
-    Route::get('/memos/create', [MemoController::class, 'create'])->name('memos.create');
     Route::post('/memos', [MemoController::class, 'store'])->name('memos.store');
     Route::get('/memos/{memo}', [MemoController::class, 'show'])->name('memos.show');
+    Route::delete('/memos/{memo}', [MemoController::class, 'archive'])->name('memos.archive');
 });
 
 Route::middleware('auth')->group(function () {

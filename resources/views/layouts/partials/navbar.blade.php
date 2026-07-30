@@ -15,6 +15,11 @@
 
         <ul class="list-none mb-0 space-x-1">
             <li class="dropdown inline-block relative">
+                <button id="theme-toggle" type="button" class="size-8 inline-flex items-center justify-center tracking-wide align-middle duration-500 text-[20px] text-center bg-gray-50 dark:bg-slate-800 hover:bg-gray-100 dark:hover:bg-slate-700 border-gray-100 dark:border-gray-800 text-slate-900 dark:text-white rounded-full">
+                    <i class="ri-moon-line dark:hidden"></i>
+                    <i class="ri-sun-line hidden dark:inline-block"></i>
+                </button>
+
                 <button data-dropdown-toggle="dropdown" class="dropdown-toggle items-center" type="button">
                     <span class="size-8 inline-flex items-center justify-center tracking-wide align-middle duration-500 text-[20px] text-center bg-gray-50 dark:bg-slate-800 hover:bg-gray-100 dark:hover:bg-slate-700 border border-gray-100 dark:border-gray-800 text-slate-900 dark:text-white rounded-full">
                         <i class="ri-user-line"></i>

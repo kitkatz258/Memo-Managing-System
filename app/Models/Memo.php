@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Memo extends Model
@@ -37,5 +38,16 @@ class Memo extends Model
     public function employeeRanks()
     {
         return $this->belongsToMany(EmployeeRank::class);
+    }
+
+    public function supersededMemos()
+    {
+        return $this->belongsToMany(Memo::class, 'memo_supersessions', 'memo_id', 'superseded_memo_id');
+    }
+
+    public function relatedMemos()
+    {
+        $ids = DB::table('memo_relations')->where('memo_id', $this->id)->pluck('related_memo_id');
+        return Memo::whereIn('id', $ids)->get();
     }
 }
