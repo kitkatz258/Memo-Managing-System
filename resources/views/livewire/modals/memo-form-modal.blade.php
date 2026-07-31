@@ -1,7 +1,7 @@
 <div>
     @if ($showModal)
         <div class="fixed inset-0 z-[1000] flex items-center justify-center bg-black/50">
-            <div class="bg-white dark:bg-slate-900 rounded-md shadow-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto p-6">
+            <div class="bg-white dark:bg-slate-900 rounded-md shadow-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto border border-gray-100 dark:border-slate-700 p-6">
 
                 <div class="flex justify-between items-center mb-4">
                     <h3 class="text-xl font-bold">{{ $editingMemoId ? 'Edit Memo' : 'Upload Memo' }}</h3>

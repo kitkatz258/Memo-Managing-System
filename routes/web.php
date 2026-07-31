@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\MemoController;
+use App\Models\Memo;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -14,7 +15,8 @@ Route::get('/dashboard', function () {
 
 Route::middleware(['auth'])->group(function(){
     Route::get('/memos', [MemoController::class, 'index'])->name('memos.index');
-    Route::post('/memos', [MemoController::class, 'store'])->name('memos.store');
+    Route::get('/memos/archived', [MemoController::class, 'archived'])->name('memos.archived');
+    Route::patch('/memos/{id}/restore', [MemoController::class, 'restore'])->name('memos.restore');
     Route::get('/memos/{memo}', [MemoController::class, 'show'])->name('memos.show');
     Route::delete('/memos/{memo}', [MemoController::class, 'archive'])->name('memos.archive');
 });

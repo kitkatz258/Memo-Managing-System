@@ -1,11 +1,11 @@
 @extends('layouts.admin')
 
 @section('content')
-    <h1 class="text-2xl font-bold mb-4">Memos</h1>
+    <h1 class="text-2xl font-bold mb-4 dark:text-white">Memos</h1>
 
-    <div class="mb-4 flex items-center gap-3">
+    <div class="mb-4 flex items-center gap-3 flex-wrap">
         <label class="font-medium">Filter by Company:</label>
-        <select id="companyFilter" class="border rounded p-2 dark:bg-slate800 dark:border-slate-700 dark:text-white">
+        <select id="companyFilter" class="border rounded-md p-2 dark:bg-slate-800 dark:border-slate-700 dark:text-white">
             <option value="">All</option>
             @foreach ($companies as $company)
                 <option value="{{ $company->id }}">{{ $company->name }} ({{ $company->code }})</option>
@@ -13,7 +13,7 @@
         </select>
 
         <label class="font-medium">Category:</label>
-        <select id="categoryFilter" class="border rounded p-2 dark:bg-slate800 dark:border-slate-700 dark:text-white">
+        <select id="categoryFilter" class="border rounded-md p-2 dark:bg-slate-800 dark:border-slate-700 dark:text-white">
             <option value="">All</option>
             @foreach($categories as $category)
                 <option value="{{ $category->id }}">{{ $category->name }}</option>
@@ -21,7 +21,7 @@
         </select>
 
         <label class="font-medium">Employee Rank:</label>
-        <select id="rankFilter" class="border rounded p-2 dark:bg-slate800 dark:border-slate-700 dark:text-white">
+        <select id="rankFilter" class="border rounded-md p-2 dark:bg-slate-800 dark:border-slate-700 dark:text-white">
             <option value="">All</option>
             @foreach($employeeRanks as $rank)
                 <option value="{{ $rank->id }}">{{ $rank->name }}</option>
@@ -29,23 +29,25 @@
         </select>
     </div>
 
-    <table id="memosTable" class="w-full border-collapse">
-        <thead>
-            <tr>
-                <th>Memo No.</th>
-                <th>Title</th>
-                <th>Company</th>
-                <th>Year</th>
-                <th>Author</th>
-                <th>Category</th>
-                <th>Employee Rank</th>
-                <th>Superseded</th>
-                <th>Related</th>
-                <th>Uploaded</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-    </table>
+    <div class="bg-white dark:bg-slate-900 rounded-md shadow-sm dark:shadow-gray-700 border border-gray-100 dark:border-slate-700 p-6">
+        <table id="memosTable" class="w-full border-collapse">
+            <thead>
+                <tr>
+                    <th>Memo No.</th>
+                    <th>Title</th>
+                    <th>Company</th>
+                    <th>Year</th>
+                    <th>Author</th>
+                    <th>Category</th>
+                    <th>Employee Rank</th>
+                    <th>Superseded</th>
+                    <th>Related</th>
+                    <th>Uploaded</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+        </table>
+    </div>
 
     @if(auth()->user()->role === 'admin')
         <livewire:modals.memo-form-modal />
@@ -59,6 +61,7 @@
     let table = $('#memosTable').DataTable({
         processing: true,
         serverSide: true,
+        dom: '<"flex justify-between items-center"l>rt<"flex justify-between items-center"ip>',
         ajax: {
             url: "{{ route('memos.index') }}",
             data: function (d) {
@@ -80,6 +83,14 @@
             { data: 'created_at_formatted', name: 'created_at' },
             { data: 'actions', name: 'actions', orderable: false, searchable: false },
         ],
+    });
+
+    let searchTimeout;
+    $('#globalSearch').on('keyup', function () {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => {
+            table.search(this.value).draw();
+        }, 300);
     });
 
     $('#companyFilter, #categoryFilter, #rankFilter').on('change', function () {
@@ -120,53 +131,77 @@
 @push('styles')
 <link rel="stylesheet" href="https://cdn.datatables.net/1.13.8/css/jquery.dataTables.min.css">
 <style>
-    #memosTable_wrapper { font-family: inherit; }
     table.dataTable thead th {
-        background-color: #f8fafc;
         font-weight: 600;
-        padding: 0.75rem 1rem;
+        font-size: 0.8125rem;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+        color: #64748b;
+        padding: 0.85rem 1rem;
         border-bottom: 2px solid #e2e8f0;
     }
-    table.dataTable tbody td {
-        padding: 0.75rem 1rem;
-        border-bottom: 1px solid #f1f5f9;
+    .dark table.dataTable thead th {
+        color: #cbd5e1;
+        border-bottom-color: #475569;
     }
+
+    table.dataTable tbody td {
+        padding: 0.9rem 1rem;
+        border-bottom: 1px solid #f1f5f9;
+        font-size: 0.9rem;
+    }
+    .dark table.dataTable tbody td {
+        color: #f1f5f9;
+        border-bottom-color: #334155;
+    }
+
     table.dataTable tbody tr:hover { background-color: #f8fafc; }
+    .dark table.dataTable tbody tr:hover { background-color: #1e293b; }
+
+    table.dataTable tbody tr:last-child td { border-bottom: none; }
+
+    .dataTables_wrapper .dataTables_length,
+    .dataTables_wrapper .dataTables_filter,
+    .dataTables_wrapper .dataTables_info,
+    .dataTables_wrapper .dataTables_paginate {
+        margin-bottom: 1rem;
+        color: #64748b;
+        font-size: 0.875rem;
+    }
+    .dark .dataTables_wrapper .dataTables_length,
+    .dark .dataTables_wrapper .dataTables_filter,
+    .dark .dataTables_wrapper .dataTables_info,
+    .dark .dataTables_wrapper .dataTables_paginate {
+        color: #94a3b8;
+    }
+
     .dataTables_filter input,
     .dataTables_length select {
         border: 1px solid #e2e8f0;
         border-radius: 0.375rem;
         padding: 0.375rem 0.75rem;
         margin-left: 0.5rem;
+        background-color: white;
     }
+    .dark .dataTables_filter input,
+    .dark .dataTables_length select {
+        background-color: #1e293b;
+        color: white;
+        border-color: #334155;
+    }
+
     .dataTables_paginate .paginate_button {
         padding: 0.375rem 0.75rem;
         margin: 0 0.125rem;
         border-radius: 0.375rem;
         cursor: pointer;
     }
+    .dark .dataTables_paginate .paginate_button { color: #e2e8f0 !important; }
     .dataTables_paginate .paginate_button.current {
         background: #4f39f6 !important;
         color: white !important;
         border: none !important;
     }
-    .dark table.dataTable thead th {
-        background-color: #1e293b;
-        color: #fff;
-        border-bottom-color: #334155;
-    }
-    .dark table.dataTable tbody td {
-        color: #e2e8f0;
-        border-bottom-color: #334155;
-    }
-    .dark table.dataTable tbody tr:hover { background-color: #1e293b; }
-    .dark .dataTables_filter input,
-    .dark .dataTables_length select {
-        background-color: #1e293b;
-        color: #fff;
-        border-color: #334155;
-    }
-    .dark .dataTables_paginate .paginate_button { color: #e2e8f0 !important; }
-    .dark label, .dark .dataTables_info { color: #e2e8f0; }
+    .dataTables_paginate .paginate_button.disabled { opacity: 0.4; cursor: default; }
 </style>
 @endpush

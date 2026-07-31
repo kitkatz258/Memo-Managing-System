@@ -8,20 +8,22 @@
             <div class="ps-1.5">
                 <div class="form-icon relative sm:block hidden">
                     <i class="ri-search-line absolute top-1/2 -translate-y-1/2 inset-s-3"></i>
-                    <input type="text" class="form-input w-56 ps-9 py-2 px-3 h-8 bg-transparent dark:bg-slate-900 dark:text-slate-200 rounded-3xl outline-none border border-gray-100 dark:border-gray-800 focus:ring-0" placeholder="Search memos...">
+                    <input type="text" id="globalSearch" class="form-input w-56 ps-9 py-2 px-3 h-8 bg-transparent dark:bg-slate-900 dark:text-slate-200 rounded-3xl outline-none border border-gray-100 dark:border-gray-800 focus:ring-0" name="s" placeholder="Search memos...">
                 </div>
             </div>
         </div>
 
         <ul class="list-none mb-0 space-x-1">
-            <li class="dropdown inline-block relative">
-                <button id="theme-toggle" type="button" class="size-8 inline-flex items-center justify-center tracking-wide align-middle duration-500 text-[20px] text-center bg-gray-50 dark:bg-slate-800 hover:bg-gray-100 dark:hover:bg-slate-700 border-gray-100 dark:border-gray-800 text-slate-900 dark:text-white rounded-full">
+            <li class="inline-block relative">
+                <button id="theme-toggle" type="button" class="size-8 inline-flex items-center justify-center tracking-wide align-middle duration-500 text-[20px] text-center bg-gray-50 dark:bg-slate-800 hover:bg-gray-100 dark:hover:bg-slate-700 border border-gray-100 dark:border-gray-800 text-slate-900 dark:text-white rounded-full">
                     <i class="ri-moon-line dark:hidden"></i>
                     <i class="ri-sun-line hidden dark:inline-block"></i>
                 </button>
+            </li>
 
+            <li class="dropdown inline-block relative">
                 <button data-dropdown-toggle="dropdown" class="dropdown-toggle items-center" type="button">
-                    <span class="size-8 inline-flex items-center justify-center tracking-wide align-middle duration-500 text-[20px] text-center bg-gray-50 dark:bg-slate-800 hover:bg-gray-100 dark:hover:bg-slate-700 border border-gray-100 dark:border-gray-800 text-slate-900 dark:text-white rounded-full">
+                    <span class="size-8 inline-flex items-center justify-center tracking-wide align-middle duration-500 text-[20px] text-center bg-gray-50 dark:bg-slate-800 hover:bg-gray-100 dark:hover:bg-slate-700 border border-gray-100 dark:border-gray-800 text-slate-900 dark:text-white rounded-full ">
                         <i class="ri-user-line"></i>
                     </span>
                     <span class="font-semibold text-[16px] ms-1 sm:inline-block hidden">{{ auth()->user()->name }}</span>

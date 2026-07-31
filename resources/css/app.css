@@ -15,6 +15,34 @@ button, [role="button"], input[type="radio"], select {
   cursor: pointer;
 }
 
+.dark .swal2-popup {
+    background: #1e2430 !important;
+    color: #e2e8f0 !important;
+}
+.dark .swal2-title,
+.dark .swal2-html-container {
+    color: #e2e8f0 !important;
+}
+.dark .swal2-toast {
+    background: #1e2430 !important;
+}
+.dark .swal2-actions .swal2-cancel {
+    background: #334155 !important;
+}
+
+.dark input:not([type="checkbox"]):not([type="radio"]),
+.dark select,
+.dark textarea {
+    border-color: #475569 !important;
+    background-color: #1e2430 !important;
+    color: #f1f5f9 !important;
+}
+.dark input:not([type="checkbox"]):not([type="radio"]):focus,
+.dark select:focus,
+.dark textarea:focus {
+    border-color: var(--color-primary) !important;
+}
+
 .page-wrapper {
   height: 100vh;
 
@@ -27,11 +55,9 @@ button, [role="button"], input[type="radio"], select {
     max-height: 100vh;
     width: calc(var(--spacing) * 75);
     background-color: var(--color-white);
-    &:where(.dark, .dark *) { background-color: var(--color-slate-900); }
+    &:where(.dark, .dark *) { background-color: #1b354e; }
     box-shadow: 0 0 3px rgb(0 0 0 / 0.1);
     transition-duration: 500ms;
-
-    &.sidebar-dark { background-color: var(--color-slate-900); }
 
     @media (max-width: 1024px) { inset-inline-start: 0; }
     @media (max-width: 425px) { width: calc(var(--spacing) * 65); }
@@ -103,7 +129,17 @@ button, [role="button"], input[type="radio"], select {
       }
     }
 
-    &.sidebar-dark .sidebar-menu {
+    .sidebar-brand > a, .sidebar-menu li a {
+      font-weight: var(--font-weight-semibold);
+      color: var(--color-slate-900);
+    }
+
+    &:where(.dark, .dark *) .sidebar-menu li:hover > a,
+    &:where(.dark, .dark *) .sidebar-menu li.active > a {
+      color: var(--color-white) !important;
+    }
+
+    &:where(.dark, .dark *) .sidebar-menu {
       li a {
         color: color-mix(in oklab, var(--color-white) 50%, transparent);
         i { background-color: color-mix(in oklab, var(--color-gray-50) 5%, transparent) !important; }
@@ -114,22 +150,12 @@ button, [role="button"], input[type="radio"], select {
       }
     }
 
-    .sidebar-brand > a, .sidebar-menu li a {
-      font-weight: var(--font-weight-semibold);
-      color: var(--color-slate-900);
-    }
-
-    &.sidebar-dark .sidebar-brand > a {
+    &:where(.dark, .dark *) .sidebar-brand > a {
       color: color-mix(in oklab, var(--color-white) 50%, transparent);
     }
 
-    .sidebar-menu li:hover > a,
-    .sidebar-menu li.active > a {
-      color: var(--color-primary) !important;
-    }
-
-    &.sidebar-dark .sidebar-menu li:hover > a,
-    &.sidebar-dark .sidebar-menu li.active > a {
+    &:where(.dark, .dark *) .sidebar-menu li:hover > a,
+    &:where(.dark, .dark *) .sidebar-menu li.active > a {
       color: var(--color-white) !important;
     }
   }
@@ -155,6 +181,7 @@ button, [role="button"], input[type="radio"], select {
         align-items: center;
         justify-content: space-between;
         background-color: var(--color-white);
+        &:where(.dark, .dark *) { background-color: var(--color-slate-900); }
         padding: calc(var(--spacing) * 6);
         box-shadow: 0 0 3px rgb(0 0 0 / 0.1);
 

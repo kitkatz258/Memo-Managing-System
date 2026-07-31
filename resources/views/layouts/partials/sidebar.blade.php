@@ -1,4 +1,4 @@
-<nav id="sidebar" class="sidebar-wrapper sidebar-dark">
+<nav id="sidebar" class="sidebar-wrapper">
     <div class="sidebar-content">
         <div class="sidebar-brand">
             <a href="{{ route('dashboard') }}" class="flex items-center justify-center gap-2 w-full"> 
@@ -20,7 +20,7 @@
 
             @if(auth()->user()->role === 'admin')
                 <li>
-                    <a href="#"><i class="ri-archive-line font-normal me-2"></i>Archives</a>
+                    <a href="{{ route('memos.archived') }}"><i class="ri-archive-line font-normal me-2"></i>Archives</a>
                 </li>
             @endif
         </ul>

@@ -6,6 +6,7 @@ use App\Models\Category;
 use App\Models\Company;
 use App\Models\EmployeeRank;
 use App\Models\Memo;
+use Dflydev\DotAccessData\Data;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Yajra\DataTables\Facades\DataTables;
@@ -123,6 +124,32 @@ class MemoController extends Controller
     public function archive(Memo $memo)
     {
         $memo->delete();
+        return response()->json(['success' => true]);
+    }
+
+    public function archived(Request $request)
+    {
+        if($request->ajax()){
+            $query = Memo::onlyTrashed()->with(['companies', 'categories', 'employeeRanks']);
+
+            return DataTables::of($query)
+                ->addColumn('company_list', fn($memo) => $memo->for_all_companies ? 'All' : $memo->companies->pluck('code')->join(', '))
+                ->addColumn('category_list', fn($memo) => $memo->for_all_categories ? 'All' : $memo->categories->pluck('name')->join(', '))
+                ->addColumn('deleted_at_formatted', fn($memo) => $memo->deleted_at->format('M d, Y'))
+                ->addColumn('actions', function($memo){
+                    return '<button onclick="restoreMemo('.$memo->id.')" class="text-emerald-600 hover:underline">Restore</button>';
+                })
+                ->rawColumns(['actions'])
+                ->make(true);
+        };
+
+        return view('memos.archived');
+    }
+
+    public function restore($id)
+    {
+        $memo = Memo::onlyTrashed()->findOrFail($id);
+        $memo->restore();
         return response()->json(['success' => true]);
     }
 

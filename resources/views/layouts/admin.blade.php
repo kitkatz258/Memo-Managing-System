@@ -19,14 +19,14 @@
     @stack('styles')
 </head>
 
-<body class="font-nunito text-base text-slate-900 dark:text-white dark:bg-slate-900">
+<body class="font-nunito text-base text-slate-900 dark:text-white dark:bg-slate-900 border border-gray-100 dark:border-slate-700 p-6">
     <div class="page-wrapper toggled">
         @include('layouts.partials.sidebar')
 
-        <main class="page-content bg-gray-50 dark:bg-slate-800">
+        <main class="page-content bg-gray-50 dark:bg-[#12161c]">
             @include('layouts.partials.navbar')
 
-            <div class="p-6">
+            <div class="p-6 pt-19">
                 @yield('content')
             </div>
         </main>
