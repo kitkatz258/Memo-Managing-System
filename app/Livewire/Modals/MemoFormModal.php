@@ -87,18 +87,26 @@ class MemoFormModal extends Component
 
         $this->forAllCompanies = $memo->for_all_companies;
         $this->selectedCompanies = $memo->companies->pluck('id')->map(fn($id) => (string) $id)->toArray();
+        $this->dispatch('set-company-values', ids: $this->selectedCompanies);
 
-        $this->forAllCategories = $memo->for_all_categories;
+        $this->forAllCategories = $memo->for_all_categories
+            ? Category::pluck('id')->map(fn($id) => (string) $id)->toArray()
+            : $memo->categorues->pluck('id')->map(fn($id) => (string) $id)->toArray;
         $this->selectedCategories = $memo->categories->pluck('id')->map(fn($id) => (string) $id)->toArray();
+        $this->dispatch('set-category-values', ids: $this->selectedCategories);
 
         $this->forAllRanks = $memo->for_all_ranks;
         $this->selectedRanks = $memo->employeeRanks->pluck('id')->map(fn($id) => (string) $id)->toArray();
+        $this->dispatch('set-rank-values', ids: $this->selectedRanks);
+
         $this->selectedSupersededMemos = $memo->supersededMemos->pluck('id')->map(fn($id) => (string) $id)->toArray();
+        $this->dispatch('set-superseded-values', ids: $this->selectedSupersededMemos);
 
         $this->selectedRelatedMemos = DB::table('memo_relations')
             ->where('memo_id', $memo->id)
             ->pluck('related_memo_id')
             ->toArray();
+        $this->dispatch('set-related-values', ids: $this->selectedRelatedMemos);
 
         $this->existingMemos = Memo::where('id', '!=', $memo->id)->select('id', 'title')->get();
 
@@ -165,7 +173,7 @@ class MemoFormModal extends Component
         }
 
         $memo->companies()->sync($this->forAllCompanies ? [] : $this->selectedCompanies);
-        $memo->categories()->sync($this->forAllCategories ? [] : $this->selectedCategories);
+        $memo->categories()->sync($this->selectedCategories);
         $memo->employeeRanks()->sync($this->forAllRanks ? [] : $this->selectedRanks);
         $memo->supersededMemos()->sync($this->selectedSupersededMemos);
 

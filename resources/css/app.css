@@ -43,6 +43,33 @@ button, [role="button"], input[type="radio"], select {
     border-color: var(--color-primary) !important;
 }
 
+.dark .ts-wrapper .ts-control {
+    background-color: #1e2430 !important;
+    border-color: #475569 !important;
+    color: #f1f5f9 !important;
+}
+.dark .ts-wrapper.focus .ts-control {
+    border-color: var(--color-primary) !important;
+}
+.dark .ts-dropdown {
+    background-color: #1e2430 !important;
+    border-color: #475569 !important;
+    color: #f1f5f9 !important;
+}
+.dark .ts-dropdown .option {
+    color: #f1f5f9 !important;
+}
+.dark .ts-dropdown .option.active {
+    background-color: #334155 !important;
+}
+.dark .ts-control input::placeholder {
+    color: #94a3b8 !important;
+}
+.item {
+    background-color: var(--color-primary) !important;
+    color: white !important;
+}
+
 .page-wrapper {
   height: 100vh;
 

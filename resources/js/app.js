@@ -1,8 +1,21 @@
 import './bootstrap';
 import Swal from 'sweetalert2';
 import 'sweetalert2/dist/sweetalert2.min.css';
+import TomSelect from 'tom-select';
+import 'tom-select/dist/css/tom-select.default.css';
 
+window.TomSelect = TomSelect;
 window.Swal = Swal;
+
+window.toggleAllCategories = function(checked) {
+    if(!window.categoryTomSelect) return;
+    if(checked) {
+        Object.keys(window.categoryTomSelect.options).forEach(id => window.categoryTomSelect.addItem(id, true));
+    } else {
+        window.categoryTomSelect.clear();
+    }
+};
+
 const theme = localStorage.getItem('theme');
 if(theme === 'dark') {
     document.documentElement.classList.add('dark');

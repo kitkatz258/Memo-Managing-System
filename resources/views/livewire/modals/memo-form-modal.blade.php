@@ -49,14 +49,28 @@
                             <input type="checkbox" wire:model.live="forAllCompanies">
                             <span class="ml-2 font-medium">All Companies</span>
                         </label>
+
                         @if (!$forAllCompanies)
-                            <div class="grid grid-cols-2 gap-1">
-                                @foreach ($companies as $company)
-                                    <label class="flex items-center">
-                                        <input type="checkbox" wire:model="selectedCompanies" value="{{ $company->id }}">
-                                        <span class="ml-2">{{ $company->name }} ({{ $company->code }})</span>
-                                    </label>
-                                @endforeach
+                            <div wire:ignore x-data x-init="
+                                let ts = new TomSelect($refs.companySelect, {
+                                    plugins: ['remove_button'],
+                                    onChange: function(values) {
+                                        $wire.set('selectedCompanies', values);
+                                        if(values.length === {{ $companies->count() }}) {
+                                            let checkbox.checked = true;
+                                            checkbox.dispatchEvent(new Event('change'));
+                                    }
+                                });
+                                Livewire.on('set-company-values', (event) => {
+                                    ts.clear(true);
+                                    event.ids.forEach(id => ts.addItem(id, true));
+                                });
+                            ">
+                                <select multiple x-ref="companySelect">
+                                    @foreach($companies as $company)
+                                        <option value="{{ $company->id }}">{{ $company->name }} ({{ $company->code }})</option>
+                                    @endforeach
+                                </select>
                             </div>
                         @endif
                         @error('selectedCompanies') <p class="text-red-600 text-sm">{{ $message }}</p> @enderror
@@ -65,19 +79,29 @@
                     {{-- Categories --}}
                     <div>
                         <label class="inline-flex items-center mb-1">
-                            <input type="checkbox" wire:model.live="forAllCategories">
+                            <input type="checkbox" id="allCategoriesCheckbox" onchange="toggleAllCategories(this.checked)">
                             <span class="ml-2 font-medium">All Categories</span>
                         </label>
-                        @if (!$forAllCategories)
-                            <div class="grid grid-cols-3 gap-1">
-                                @foreach ($categories as $category)
-                                    <label class="flex items-center">
-                                        <input type="checkbox" wire:model="selectedCategories" value="{{ $category->id }}">
-                                        <span class="ml-2">{{ $category->name }}</span>
-                                    </label>
+
+                        <div wire:ignore x-data x-init="
+                            window.categoryTomSelect = new TomSelect($refs.categorySelect, {
+                                plugins: ['remove_button'],
+                                onChange: function(values) {
+                                    $wire.set('selectedCategories', values);
+                                    document.getElementById('allCategoriesCheckbox').checked = (values.length === {{ $categories->count() }});
+                                }
+                            });
+                            Livewire.on('set-category-values', (event) => {
+                                categoryTomSelect.clear(true);
+                                event.ids.forEach(id => categoryTomSelect.addItem(id, true));
+                            });
+                        ">
+                            <select multiple x-ref="categorySelect">
+                                @foreach($categories as $category)
+                                    <option value="{{ $category->id }}">{{ $category->name }}</option>
                                 @endforeach
-                            </div>
-                        @endif
+                            </select>
+                        </div>
                         @error('selectedCategories') <p class="text-red-600 text-sm">{{ $message }}</p> @enderror
                     </div>
 
@@ -87,14 +111,25 @@
                             <input type="checkbox" wire:model.live="forAllRanks">
                             <span class="ml-2 font-medium">All Employee Ranks</span>
                         </label>
+
                         @if (!$forAllRanks)
-                            <div class="grid grid-cols-3 gap-1">
-                                @foreach ($employeeRanks as $rank)
-                                    <label class="flex items-center">
-                                        <input type="checkbox" wire:model="selectedRanks" value="{{ $rank->id }}">
-                                        <span class="ml-2">{{ $rank->name }}</span>
-                                    </label>
-                                @endforeach
+                            <div wire:ignore x-data x-init="
+                                let ts = new TomSelect($refs.rankSelect, {
+                                    plugins: ['remove_button'],
+                                    onChange: function(values) {
+                                        $wire.set('selectedRanks', values);
+                                    }
+                                });
+                                Livewire.on('set-rank-values', (event) => {
+                                    ts.clear(true);
+                                    event.ids.forEach(id => ts.addItem(id, true));
+                                });
+                            ">
+                                <select multiple x-ref="rankSelect">
+                                    @foreach($employeeRanks as $rank)
+                                        <option value="{{ $rank->id }}">{{ $rank->name }}</option>
+                                    @endforeach
+                                </select>
                             </div>
                         @endif
                         @error('selectedRanks') <p class="text-red-600 text-sm">{{ $message }}</p> @enderror
@@ -103,28 +138,49 @@
                     {{-- Superseded memos --}}
                     <div>
                         <label class="block font-medium mb-1">Superseded Memo(s)</label>
-                        <select wire:model="selectedSupersededMemos" multiple class="w-full border rounded p-2 h-28">
-                            @foreach ($existingMemos as $m)
-                                <option value="{{ $m->id }}">{{ $m->title }}</option>
-                            @endforeach
-                        </select>
+                        <div wire:ignore x-data x-init="
+                            window.supersededTomSelect = new TomSelect($refs.supersededSelect, {
+                                plugins: ['remove_button'],
+                                placeholder: 'Search memos to mark as superseded...',
+                                onChange: function(values) {
+                                    $wire.set('selectedSupersededMemos', values);
+                                }
+                            });
+                            Livewire.on('set-superseded-values', (event) => {
+                                supersededTomSelect.clear(true);
+                                event.ids.forEach(id => supersededTomSelect.addItem(id, true));
+                            });
+                        ">
+                            <select multiple x-ref="supersededSelect">
+                                @foreach ($existingMemos as $m)
+                                    <option value="{{ $m->id }}">{{ $m->title }}</option>
+                                @endforeach
+                            </select>
+                        </div>
                     </div>
 
                     {{-- Related memos --}}
                     <div>
                         <label class="block font-medium mb-1">Interconnected Memo(s)</label>
-                        <select wire:model="selectedRelatedMemos" multiple class="w-full border rounded p-2 h-28">
-                            @foreach ($existingMemos as $m)
-                                <option value="{{ $m->id }}">{{ $m->title }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-
-                    <div class="flex justify-end gap-2 pt-2">
-                        <button type="button" wire:click="closeModal" class="px-4 py-2 rounded border">Cancel</button>
-                        <button type="submit" class="px-4 py-2 rounded bg-blue-600 text-white" wire:loading.attr="disabled" wire:target="save">
-                            {{ $editingMemoId ? 'Update' : 'Upload' }}
-                        </button>
+                        <div wire:ignore x-data x-init="
+                            window.relatedTomSelect = new TomSelect($refs.relatedSelect, {
+                                plugins: ['remove_button'],
+                                placeholder: 'Search memos to interconnect...',
+                                onChange: function(values) {
+                                    $wire.set('selectedRelatedMemos', values);
+                                }
+                            });
+                            Livewire.on('set-related-values', (event) => {
+                                relatedTomSelect.clear(true);
+                                event.ids.forEach(id => relatedTomSelect.addItem(id, true));
+                            });
+                        ">
+                            <select multiple x-ref="relatedSelect">
+                                @foreach ($existingMemos as $m)
+                                    <option value="{{ $m->id }}">{{ $m->title }}</option>
+                                @endforeach
+                            </select>
+                        </div>
                     </div>
 
                 </form>
