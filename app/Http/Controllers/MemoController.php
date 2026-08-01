@@ -98,7 +98,6 @@ class MemoController extends Controller
                         );
                     }
                 })
-                ->addColumn('title_link', fn($memo) => '<a href="'.route('memos.show', $memo->id).'" class="text-primary underline" target="_blank">'.e($memo->title).'</a>')
                 ->addColumn('company_list', fn($memo) => $memo->for_all_companies ? 'All' : $memo->companies->pluck('code')->join(', '))
                 ->addColumn('category_list', fn($memo) => $memo->for_all_categories ? 'All' : $memo->categories->pluck('name')->join(', '))
                 ->addColumn('rank_list', fn($memo) => $memo->for_all_ranks ? 'All' : $memo->employeeRanks->pluck('name')->join(', '))
@@ -111,7 +110,10 @@ class MemoController extends Controller
                         <button onclick="archiveMemo('.$memo->id.')" class="text-red-600 hover:underline">Archive</button>
                     ';
                 })
-                ->rawColumns(['title_link', 'actions'])
+                ->addColumn('memo_no_link', function ($memo) {
+                    return '<button class="view-pdf-btn text-primary underline" data-id="'.$memo->id.'" data-memono="'.e($memo->memo_no).'" data-title="'.e($memo->title).'">'.e($memo->memo_no).'</button>';
+                })
+                ->rawColumns(['memo_no_link', 'actions'])
                 ->make(true);
         }
 
@@ -144,6 +146,16 @@ class MemoController extends Controller
         };
 
         return view('memos.archived');
+    }
+
+    public function viewInline(Memo $memo)
+    {
+        return response()->file(storage_path('app/public/'.$memo->file_path));
+    }
+
+    public function download(Memo $memo)
+    {
+        return response()->download(storage_path('app/public/'.$memo->file_path), $memo->original_filename);
     }
 
     public function restore($id)

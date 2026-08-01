@@ -56,9 +56,11 @@
                                     plugins: ['remove_button'],
                                     onChange: function(values) {
                                         $wire.set('selectedCompanies', values);
-                                        if(values.length === {{ $companies->count() }}) {
-                                            let checkbox.checked = true;
+                                        if (values.length === {{ $companies->count() }}) {
+                                            let checkbox = document.querySelector('[wire\\:model\\.live=forAllCompanies]');
+                                            checkbox.checked = true;
                                             checkbox.dispatchEvent(new Event('change'));
+                                        }
                                     }
                                 });
                                 Livewire.on('set-company-values', (event) => {
@@ -118,6 +120,11 @@
                                     plugins: ['remove_button'],
                                     onChange: function(values) {
                                         $wire.set('selectedRanks', values);
+                                        if (values.length === {{ $employeeRanks->count() }}) {
+                                            let checkbox = document.querySelector('[wire\\:model\\.live=forAllRanks]');
+                                            checkbox.checked = true;
+                                            checkbox.dispatchEvent(new Event('change'));
+                                        }
                                     }
                                 });
                                 Livewire.on('set-rank-values', (event) => {
@@ -141,21 +148,31 @@
                         <div wire:ignore x-data x-init="
                             window.supersededTomSelect = new TomSelect($refs.supersededSelect, {
                                 plugins: ['remove_button'],
+                                valueField: 'id',
+                                labelField: 'title',
+                                searchField: 'title',
+                                create: false,
                                 placeholder: 'Search memos to mark as superseded...',
+                                load: function(query, callback) {
+                                    fetch(`/memos/search-picker?query=${encodeURIComponent(query)}&exclude=${$wire.editingMemoId ?? ''}`)
+                                        .then(res => res.json())
+                                        .then(json => callback(json))
+                                        .catch(() => callback());
+                                },
                                 onChange: function(values) {
                                     $wire.set('selectedSupersededMemos', values);
                                 }
                             });
                             Livewire.on('set-superseded-values', (event) => {
                                 supersededTomSelect.clear(true);
-                                event.ids.forEach(id => supersededTomSelect.addItem(id, true));
+                                supersededTomSelect.clearOptions();
+                                event.items.forEach(item => {
+                                    supersededTomSelect.addOption(item);
+                                    supersededTomSelect.addItem(item.id, true);
+                                });
                             });
                         ">
-                            <select multiple x-ref="supersededSelect">
-                                @foreach ($existingMemos as $m)
-                                    <option value="{{ $m->id }}">{{ $m->title }}</option>
-                                @endforeach
-                            </select>
+                            <select x-ref="supersededSelect"></select>
                         </div>
                     </div>
 
@@ -165,22 +182,39 @@
                         <div wire:ignore x-data x-init="
                             window.relatedTomSelect = new TomSelect($refs.relatedSelect, {
                                 plugins: ['remove_button'],
+                                valueField: 'id',
+                                labelField: 'title',
+                                searchField: 'title',
+                                create: false,
                                 placeholder: 'Search memos to interconnect...',
+                                load: function(query, callback) {
+                                    fetch(`/memos/search-picker?query=${encodeURIComponent(query)}&exclude=${$wire.editingMemoId ?? ''}`)
+                                        .then(res => res.json())
+                                        .then(json => callback(json))
+                                        .catch(() => callback());
+                                },
                                 onChange: function(values) {
                                     $wire.set('selectedRelatedMemos', values);
                                 }
                             });
                             Livewire.on('set-related-values', (event) => {
                                 relatedTomSelect.clear(true);
-                                event.ids.forEach(id => relatedTomSelect.addItem(id, true));
+                                relatedTomSelect.clearOptions();
+                                event.items.forEach(item => {
+                                    relatedTomSelect.addOption(item);
+                                    relatedTomSelect.addItem(item.id, true);
+                                });
                             });
                         ">
-                            <select multiple x-ref="relatedSelect">
-                                @foreach ($existingMemos as $m)
-                                    <option value="{{ $m->id }}">{{ $m->title }}</option>
-                                @endforeach
-                            </select>
+                            <select x-ref="relatedSelect"></select>
                         </div>
+                    </div>
+
+                    <div class="flex justify-end gap-2 pt-2">
+                        <button type="button" wire:click="closeModal" class="px-4 py-2 rounded border">Cancel</button>
+                        <button type="submit" class="px-4 py-2 rounded bg-blue-600 text-white" wire:loading.attr="disabled" wire:target="save">
+                            {{ $editingMemoId ? 'Update' : 'Upload' }}
+                        </button>
                     </div>
 
                 </form>

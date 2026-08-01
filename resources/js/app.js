@@ -42,3 +42,24 @@ document.addEventListener('DOMContentLoaded',() =>{
         localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
     });
 });
+
+document.addEventListener('alpine:init', () => {
+    Alpine.store('pdfViewer', {
+        open: false,
+        url: '',
+        downloadUrl: '',
+        title: '',
+        memoNo: '',
+        show(id, memoNo, title) {
+            this.url = `/memos/${id}/view`;
+            this.downloadUrl = `/memos/${id}/download`;
+            this.title = title;
+            this.memoNo = memoNo;
+            this.open = true;
+        },
+        close() {
+            this.open = false;
+            this.url = '';
+        }
+    });
+});

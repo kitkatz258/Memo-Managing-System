@@ -100,15 +100,14 @@ class MemoFormModal extends Component
         $this->dispatch('set-rank-values', ids: $this->selectedRanks);
 
         $this->selectedSupersededMemos = $memo->supersededMemos->pluck('id')->map(fn($id) => (string) $id)->toArray();
-        $this->dispatch('set-superseded-values', ids: $this->selectedSupersededMemos);
+        $this->dispatch('set-superseded-values', items: $memo->supersededMemos->map(fn($m) => ['id' => $m->id, 'title' => $m->title])->toArray());
 
         $this->selectedRelatedMemos = DB::table('memo_relations')
             ->where('memo_id', $memo->id)
             ->pluck('related_memo_id')
             ->toArray();
-        $this->dispatch('set-related-values', ids: $this->selectedRelatedMemos);
-
-        $this->existingMemos = Memo::where('id', '!=', $memo->id)->select('id', 'title')->get();
+        $relatedMemos = Memo::whereIn('id', DB::table('memo_relations')->where('memo_id', $memo->id)->pluck('related_memo_id'))->get();
+        $this->dispatch('set-related-values', items: $relatedMemos->map(fn($m) => ['id' => $m->id, 'title' => $m->title])->toArray());
 
         $this->showModal = true;
     }
@@ -204,6 +203,21 @@ class MemoFormModal extends Component
         ]);
         $this->year = now()->year;
         $this->resetValidation();
+    }
+
+    public function searchPicker(Request $request)
+    {
+        $query = Memo::query();
+
+        if($search = $request->input('search')) {
+            $query->where('title', 'like', "%{$search}%");
+        }
+
+        if($exclude = $request->get('exclude')) {
+            $query->where('id', '!=', $exclude);
+        }
+
+        return $query->select('id', 'title')->limit(20)->get();
     }
 
     public function render()

@@ -49,6 +49,21 @@
         </table>
     </div>
 
+    <div x-data x-show="$store.pdfViewer.open" x-cloak class="fixed inset-0 z-[1000] flex items-center justify-center bg-black/50" style="display: none;">
+        <div class="bg-white dark:bg-slate-900 rounded-md shadow-lg w-full max-w-4xl h-[85vh] flex flex-col border border-gray-100 dark:border-slate-700">
+
+            <div class="flex justify-between items-center p-4 border-b border-gray-100 dark:border-slate-700">
+                <div>
+                    <h3 class="font-bold dark:text-white" x-text="$store.pdfViewer.title"></h3>
+                    <p class="text-sm text-slate-400">Memo No. <span x-text="$store.pdfViewer.memoNo"></span></p>
+                </div>
+                <button @click="$store.pdfViewer.close()" class="text-slate-400 hover:text-slate-700 text-xl">&times;</button>
+            </div>
+
+            <iframe id="pdfFrame" :src="$store.pdfViewer.url" class="flex-1 w-full"></iframe>
+        </div>
+    </div>
+
     @if(auth()->user()->role === 'admin')
         <livewire:modals.memo-form-modal />
     @endif
@@ -71,8 +86,8 @@
             }
         },
         columns: [
-            { data: 'memo_no', name: 'memo_no' },
-            { data: 'title_link', name: 'title' },
+            { data: 'memo_no_link', name: 'memo_no' },
+            { data: 'title', name: 'title' },
             { data: 'company_list', name: 'company_list', orderable: false, searchable: false },
             { data: 'year', name: 'year' },
             { data: 'author', name: 'author' },
@@ -125,6 +140,14 @@
             }
         });
     }
+
+    $(document).on('click', '.view-pdf-btn', function () {
+        Alpine.store('pdfViewer').show(
+            $(this).data('id'),
+            $(this).data('memono'),
+            $(this).data('title')
+        );
+    });
 </script>
 @endpush
 

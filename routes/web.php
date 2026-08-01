@@ -27,4 +27,8 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
+Route::get('/memos/search-picker', [MemoController::class, 'searchPicker'])->name('memos.search-picker');
+Route::get('/memos/{memo}/view', [MemoController::class, 'viewInline'])->name('memos.view');
+Route::get('/memos/{memo}/download', [MemoController::class, 'download'])->name('memos.download');
+
 require __DIR__.'/auth.php';

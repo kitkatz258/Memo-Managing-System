@@ -19,5 +19,7 @@
         @endif
     </div>
 
-    <livewire:modals.memo-form-modal />
+    @if(auth()->user()->role === 'admin')
+        <livewire:modals.memo-form-modal />
+    @endif
 @endsection
