@@ -66,7 +66,7 @@ class MemoController extends Controller
     public function index(Request $request)
     {
         if ($request->ajax()) {
-            $query = Memo::with(['companies', 'categories', 'employeeRanks', 'supersededMemos']);
+            $query = Memo::with(['companies', 'categories', 'employeeRanks', 'supersededMemos', 'relatedMemos']);
 
             if ($companyId = $request->get('company_id')) {
                 $query->where(function ($q) use ($companyId) {
@@ -102,7 +102,7 @@ class MemoController extends Controller
                 ->addColumn('category_list', fn($memo) => $memo->for_all_categories ? 'All' : $memo->categories->pluck('name')->join(', '))
                 ->addColumn('rank_list', fn($memo) => $memo->for_all_ranks ? 'All' : $memo->employeeRanks->pluck('name')->join(', '))
                 ->addColumn('superseded_list', fn($memo) => $memo->supersededMemos->pluck('title')->join(', ') ?: '—')
-                ->addColumn('related_list', fn($memo) => $memo->relatedMemos()->pluck('title')->join(', ') ?: '—')
+                ->addColumn('related_list', fn($memo) => $memo->relatedMemos->pluck('title')->join(', ') ?: '—')
                 ->addColumn('created_at_formatted', fn($memo) => $memo->created_at->format('M d, Y'))
                 ->addColumn('actions', function ($memo) {
                     return '

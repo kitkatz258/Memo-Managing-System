@@ -47,7 +47,6 @@ class Memo extends Model
 
     public function relatedMemos()
     {
-        $ids = DB::table('memo_relations')->where('memo_id', $this->id)->pluck('related_memo_id');
-        return Memo::whereIn('id', $ids)->get();
+        return $this->belongsToMany(Memo::class, 'memo_relations', 'memo_id', 'related_memo_id');
     }
 }

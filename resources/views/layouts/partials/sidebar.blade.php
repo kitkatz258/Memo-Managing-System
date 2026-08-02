@@ -3,7 +3,7 @@
         <div class="sidebar-brand">
             <a href="{{ route('dashboard') }}" class="flex items-center justify-center gap-2 w-full"> 
                 <i class="ri-file-text-line text-2xl text-primary"></i>
-                <span class="text-lg font-bold text-white">Memo System</span>
+                <span class="text-lg font-bold">Memo System</span>
             </a>
         </div>
 

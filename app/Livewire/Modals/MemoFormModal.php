@@ -76,7 +76,7 @@ class MemoFormModal extends Component
     {
         $this->resetForm();
 
-        $memo = Memo::with(['companies', 'categories', 'employeeRanks', 'supersededMemos'])->findOrFail($memoId);
+        $memo = Memo::with(['companies', 'categories', 'employeeRanks', 'supersededMemos', 'relatedMemos'])->findOrFail($memoId);
 
         $this->editingMemoId = $memo->id;
         $this->title = $memo->title;
@@ -106,8 +106,7 @@ class MemoFormModal extends Component
             ->where('memo_id', $memo->id)
             ->pluck('related_memo_id')
             ->toArray();
-        $relatedMemos = Memo::whereIn('id', DB::table('memo_relations')->where('memo_id', $memo->id)->pluck('related_memo_id'))->get();
-        $this->dispatch('set-related-values', items: $relatedMemos->map(fn($m) => ['id' => $m->id, 'title' => $m->title])->toArray());
+        $this->dispatch('set-related-values', items: $memo->map(fn($m) => ['id' => $m->id, 'title' => $m->title])->toArray());
 
         $this->showModal = true;
     }
