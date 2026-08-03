@@ -16,8 +16,11 @@ Route::get('/dashboard', function () {
 Route::middleware(['auth'])->group(function(){
     Route::get('/memos', [MemoController::class, 'index'])->name('memos.index');
     Route::get('/memos/archived', [MemoController::class, 'archived'])->name('memos.archived');
+    Route::get('/memos/search-picker', [MemoController::class, 'searchPicker'])->name('memos.search-picker');
     Route::patch('/memos/{id}/restore', [MemoController::class, 'restore'])->name('memos.restore');
-    Route::get('/memos/{memo}', [MemoController::class, 'show'])->name('memos.show');
+
+    Route::get('/memos/{memo}/view', [MemoController::class, 'viewInline'])->name('memos.view');
+    Route::get('/memos/{memo}/download', [MemoController::class, 'download'])->name('memos.download');
     Route::delete('/memos/{memo}', [MemoController::class, 'archive'])->name('memos.archive');
 });
 
@@ -26,9 +29,5 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
-
-Route::get('/memos/search-picker', [MemoController::class, 'searchPicker'])->name('memos.search-picker');
-Route::get('/memos/{memo}/view', [MemoController::class, 'viewInline'])->name('memos.view');
-Route::get('/memos/{memo}/download', [MemoController::class, 'download'])->name('memos.download');
 
 require __DIR__.'/auth.php';

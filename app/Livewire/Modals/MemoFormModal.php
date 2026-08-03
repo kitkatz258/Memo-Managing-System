@@ -12,6 +12,7 @@ use Livewire\Component;
 use Livewire\WithFileUploads;
 use Livewire\Attributes\On;
 use Smalot\PdfParser\Parser;
+use Illuminate\Http\Request;
 
 class MemoFormModal extends Component
 {
@@ -89,10 +90,14 @@ class MemoFormModal extends Component
         $this->selectedCompanies = $memo->companies->pluck('id')->map(fn($id) => (string) $id)->toArray();
         $this->dispatch('set-company-values', ids: $this->selectedCompanies);
 
-        $this->forAllCategories = $memo->for_all_categories
-            ? Category::pluck('id')->map(fn($id) => (string) $id)->toArray()
-            : $memo->categorues->pluck('id')->map(fn($id) => (string) $id)->toArray;
-        $this->selectedCategories = $memo->categories->pluck('id')->map(fn($id) => (string) $id)->toArray();
+        $this->forAllCategories = $memo->for_all_categories;
+
+        $this->selectedCategories = $memo->for_all_categories
+            ? []
+            : $memo->categories
+                ->pluck('id')
+                ->map(fn ($id) => (string) $id)
+                ->toArray();
         $this->dispatch('set-category-values', ids: $this->selectedCategories);
 
         $this->forAllRanks = $memo->for_all_ranks;
@@ -106,7 +111,7 @@ class MemoFormModal extends Component
             ->where('memo_id', $memo->id)
             ->pluck('related_memo_id')
             ->toArray();
-        $this->dispatch('set-related-values', items: $memo->map(fn($m) => ['id' => $m->id, 'title' => $m->title])->toArray());
+        $this->dispatch('set-related-values', items: $memo->relatedMemos->map(fn($m) => ['id' => $m->id, 'title' => $m->title])->toArray());
 
         $this->showModal = true;
     }

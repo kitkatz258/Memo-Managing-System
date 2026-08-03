@@ -89,6 +89,7 @@
                             window.categoryTomSelect = new TomSelect($refs.categorySelect, {
                                 plugins: ['remove_button'],
                                 onChange: function(values) {
+                                    
                                     $wire.set('selectedCategories', values);
                                     document.getElementById('allCategoriesCheckbox').checked = (values.length === {{ $categories->count() }});
                                 }
@@ -172,7 +173,7 @@
                                 });
                             });
                         ">
-                            <select x-ref="supersededSelect"></select>
+                            <select multiple x-ref="supersededSelect"></select>
                         </div>
                     </div>
 
@@ -206,7 +207,7 @@
                                 });
                             });
                         ">
-                            <select x-ref="relatedSelect"></select>
+                            <select multiple x-ref="relatedSelect"></select>
                         </div>
                     </div>
 

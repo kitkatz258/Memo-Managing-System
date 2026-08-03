@@ -123,6 +123,21 @@ class MemoController extends Controller
         return view('memos.index', compact('companies', 'categories', 'employeeRanks'));
     }
 
+    public function searchPicker(Request $request)
+    {
+        $query = Memo::query();
+
+        if($search = $request->get('query')){
+            $query->where('title', 'like', "%{$search}%");
+        }
+
+        if($exclude = $request->get('exclude')){
+            $query->where('id', '!=', $exclude);
+        }
+
+        return $query->select('id', 'title')->limit(20)->get();
+    }
+
     public function archive(Memo $memo)
     {
         $memo->delete();

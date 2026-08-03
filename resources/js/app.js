@@ -10,7 +10,9 @@ window.Swal = Swal;
 window.toggleAllCategories = function(checked) {
     if(!window.categoryTomSelect) return;
     if(checked) {
-        Object.keys(window.categoryTomSelect.options).forEach(id => window.categoryTomSelect.addItem(id, true));
+        window.categoryTomSelect.setValue(
+            Object.keys(window.categoryTomSelect.options)
+        );
     } else {
         window.categoryTomSelect.clear();
     }
