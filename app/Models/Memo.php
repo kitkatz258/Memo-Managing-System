@@ -49,4 +49,9 @@ class Memo extends Model
     {
         return $this->belongsToMany(Memo::class, 'memo_relations', 'memo_id', 'related_memo_id');
     }
+
+    public function supersededByMemos()
+    {
+        return $this->belongsToMany(Memo::class, 'memo_supersessions', 'superseded_memo_id', 'memo_id');
+    }
 }

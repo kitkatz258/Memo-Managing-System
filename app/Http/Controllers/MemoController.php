@@ -111,7 +111,13 @@ class MemoController extends Controller
                     ';
                 })
                 ->addColumn('memo_no_link', function ($memo) {
-                    return '<button class="view-pdf-btn text-primary underline" data-id="'.$memo->id.'" data-memono="'.e($memo->memo_no).'" data-title="'.e($memo->title).'">'.e($memo->memo_no).'</button>';
+                    return '<button type="button" 
+                        class="view-pdf-btn text-primary underline" 
+                        data-id="'.$memo->id.'" 
+                        data-memono="'.e($memo->memo_no).'" 
+                        data-title="'.e($memo->title).'">'
+                        .e($memo->memo_no).
+                    '</button>';
                 })
                 ->rawColumns(['memo_no_link', 'actions'])
                 ->make(true);
@@ -120,7 +126,27 @@ class MemoController extends Controller
         $companies = Company::all();
         $categories = Category::all();
         $employeeRanks = EmployeeRank::all();
+        
         return view('memos.index', compact('companies', 'categories', 'employeeRanks'));
+    }
+
+    public function details(Memo $memo)
+    {
+        $memo->load(['companies', 'categories', 'supersededMemos', 'relatedMemos', 'supersededMemos']);
+
+        return response()->json([
+            'id' => $memo->id,
+            'memo_no' => $memo->memo_no,
+            'title' => $memo->title,
+            'category' => $memo->for_all_categories ? 'All' : ($memo->categories->pluck('name')->join(', ') ?: '—'),
+            'company' => $memo->for_all_companies ? 'All' : ($memo->companies->pluck('name')->join(', ') ?: '—'),
+            'author' => $memo->author ?: '—',
+            'year' => $memo->year,
+            'uploaded' => $memo->created_at->format('M d, Y'),
+            'related' => $memo->relatedMemos->map(fn($m) => ['id' => $m->id, 'memo_no' => $m->memo_no]),
+            'superseded' => $memo->supersededMemos->map(fn($m) => ['id' => $m->id, 'memo_no' => $m->memo_no]),
+            'superseded_by' => $memo->supersededByMemos->map(fn($m) => ['id' => $m->id, 'memo_no' => $m->memo_no])
+        ]);
     }
 
     public function searchPicker(Request $request)

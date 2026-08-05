@@ -42,7 +42,6 @@
                     <th>Employee Rank</th>
                     <th>Superseded</th>
                     <th>Related</th>
-                    <th>Uploaded</th>
                 </tr>
             </thead>
         </table>
@@ -62,29 +61,54 @@
             <iframe id="pdfFrame" :src="$store.pdfViewer.url" class="flex-1 w-full"></iframe>
         </div>
     </div> --}}
-    <div id="pdfModal"
-        class="fixed inset-0 z-[1000] hidden items-center justify-center bg-black/50">
+    <div id="pdfModal" class="fixed inset-0 z-[1000] hidden items-center justify-center bg-black/50">
+        <div class="bg-white dark:bg-slate-900 rounded-md shadow-lg w-full max-w-4xl h-[90vh] flex flex-col border border-gray-100 dark:border-slate-700 overflow-hidden">
 
-        <div class="bg-white dark:bg-slate-900 rounded-md shadow-lg w-full max-w-4xl h-[85vh] flex flex-col border border-gray-100 dark:border-slate-700">
-
-            <div class="flex justify-between items-center p-4 border-b border-gray-100 dark:border-slate-700">
+            <div class="flex justify-between items-start p-4 border-b border-gray-100 dark:border-slate-700">
                 <div>
-                    <h3 id="pdfTitle" class="font-bold dark:text-white"></h3>
-
-                    <p class="text-sm text-slate-400">
-                        Memo No.
-                        <span id="pdfMemoNo"></span>
-                    </p>
+                    <p class="text-sm text-slate-400">Memo No. <span id="pdfMemoNo" class="font-semibold text-slate-700 dark:text-slate-200"></span></p>
+                    <h3 id="pdfTitle" class="font-bold text-lg dark:text-white mt-1"></h3>
+                    <p id="pdfCategory" class="text-sm text-slate-400"></p>
                 </div>
-
-                <button id="closePdfModal"
-                        class="text-slate-400 hover:text-slate-700 text-xl">
-                    &times;
-                </button>
+                <button id="closePdfModal" class="text-slate-400 hover:text-slate-700 text-xl">&times;</button>
             </div>
 
-            <iframe id="pdfFrame"
-                    class="flex-1 w-full"></iframe>
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 p-4 border-b border-gray-100 dark:border-slate-700 text-sm">
+                <div>
+                    <p class="text-slate-400">Company</p>
+                    <p id="pdfCompany" class="font-medium dark:text-white"></p>
+                </div>
+                <div>
+                    <p class="text-slate-400">Author</p>
+                    <p id="pdfAuthor" class="font-medium dark:text-white"></p>
+                </div>
+                <div>
+                    <p class="text-slate-400">Year</p>
+                    <p id="pdfYear" class="font-medium dark:text-white"></p>
+                </div>
+            </div>
+
+            <iframe id="pdfFrame" class="flex-1 w-full"></iframe>
+
+            <div class="grid sm:grid-cols-3 gap-4 p-4 border-t border-gray-100 dark:border-slate-700 text-sm max-h-40 overflow-y-auto">
+                <div>
+                    <p class="font-semibold mb-1 dark:text-white">Related Memos</p>
+                    <ul id="pdfRelated" class="space-y-1"></ul>
+                </div>
+                <div>
+                    <p class="font-semibold mb-1 dark:text-white">Superseded Memos</p>
+                    <ul id="pdfSuperseded" class="space-y-1"></ul>
+                </div>
+                <div>
+                    <p class="font-semibold mb-1 dark:text-white">Superseded By</p>
+                    <ul id="pdfSupersededBy" class="space-y-1"></ul>
+                </div>
+            </div>
+
+            <div class="flex justify-end gap-2 p-4 border-t border-gray-100 dark:border-slate-700">
+                <a id="pdfDownload" href="#" class="px-3 py-1.5 rounded-md bg-primary text-white text-sm">Download</a>
+                <button onclick="document.getElementById('closePdfModal').click()" class="px-3 py-1.5 rounded-md border border-gray-200 dark:border-slate-700 text-sm dark:text-white">Close</button>
+            </div>
 
         </div>
     </div>
@@ -116,7 +140,6 @@
             { data: 'rank_list', name: 'rank_list', orderable: false, searchable: false },
             { data: 'superseded_list', name: 'superseded_list', orderable: false, searchable: false },
             { data: 'related_list', name: 'related_list', orderable: false, searchable: false },
-            { data: 'created_at_formatted', name: 'created_at' },
         ],
     });
 
@@ -145,30 +168,64 @@
     //         $(this).data('title')
     //     );
     // });
-    $(document).on('click', '.view-pdf-btn', function () {
-        const id = $(this).data('id');
-        const memoNo = $(this).data('memono');
-        const title = $(this).data('title');
+    function renderMemoLinks(containerId, items){
+        const el = $('#' + containerId);
+        el.empty();
 
-        $('#pdfTitle').text(title);
-        $('#pdfMemoNo').text(memoNo);
-        $('#pdfFrame').attr('src', `/memos/${id}/view`);
+        if(!items || items.length === 0){
+            el.append('<li class="text-slate-400">—</li>');
+            return;
+        }
+        items.forEach(item => {
+            el.append(`
+            <li>
+                <a href="#"
+                class="open-related-memo text-primary"
+                data-id="${item.id}">
+                📄 ${item.memo_no}
+                </a>
+            </li>
+            `);
+        })
+    }
 
-        $('#pdfModal')
-            .removeClass('hidden')
-            .addClass('flex');
+    function openPdfViewer(id){
+        fetch(`/memos/${id}/details`)
+            .then(res => res.json())
+            .then(data => {
+                $('#pdfTitle').text(data.title);
+                $('#pdfMemoNo').text(data.memo_no);
+                $('#pdfCategory').text(data.category);
+                $('#pdfCompany').text(data.company);
+                $('#pdfAuthor').text(data.author);
+                $('#pdfYear').text(data.year);
+                $('#pdfFrame').attr('src', `/memos/${id}/view`);
+                $('#pdfDownload').attr('href', `/memos/${id}/download`);
+
+                renderMemoLinks('pdfRelated', data.related);
+                renderMemoLinks('pdfSuperseded', data.superseded);
+                renderMemoLinks('pdfSupersededBy', data.superseded_by);
+
+                $('#pdfModal').removeClass('hidden').addClass('flex');
+            });           
+    }
+
+    $(document).on('click', '.view-pdf-btn', function(){
+        openPdfViewer($(this).data('id'));
     });
 
-    $('#closePdfModal').on('click', function () {
-        $('#pdfModal')
-            .removeClass('flex')
-            .addClass('hidden');
+    $(document).on('click', '.open-related-memo', function(e){
+        e.preventDefault();
+        openPdfViewer($(this).data('id'));
+    });
 
+    $('#closePdfModal').on('click', function(){
+        $('#pdfModal').removeClass('flex').addClass('hidden');
         $('#pdfFrame').attr('src', '');
     });
 
-    $('#pdfModal').on('click', function (e) {
-        if (e.target === this) {
+    $('#pdfModal').on('click', function(e){
+        if(e.target === this){
             $('#closePdfModal').click();
         }
     });

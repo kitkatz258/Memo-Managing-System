@@ -48,10 +48,10 @@ class UserMemoController extends Controller
                         : $memo->employeeRanks->pluck('name')->join(', ')
                 )
                 ->addColumn('superseded_list', fn($memo) =>
-                    $memo->supersededMemos->pluck('title')->join(', ') ?: '-'
+                    $memo->supersededMemos->pluck('title')->join(', ') ?: '—'
                 )
                 ->addColumn('related_list', fn($memo) =>
-                    $memo->relatedMemos->pluck('title')->join(', ') ?: '-'
+                    $memo->relatedMemos->pluck('title')->join(', ') ?: '—'
                 )
                 ->addColumn('created_at_formatted', fn($memo) =>
                     $memo->created_at->format('M d, Y')
