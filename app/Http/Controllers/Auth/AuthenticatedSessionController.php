@@ -30,7 +30,7 @@ class AuthenticatedSessionController extends Controller
         $request->session()->regenerate();
 
         if(auth()->user()->role === 'admin') {
-            return redirect()->route('memos.index');
+            return redirect()->route('dashboard');
         }
 
         return redirect()->route('user.memos.index');

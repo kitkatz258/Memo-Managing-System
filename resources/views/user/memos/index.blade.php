@@ -61,6 +61,7 @@
             <iframe id="pdfFrame" :src="$store.pdfViewer.url" class="flex-1 w-full"></iframe>
         </div>
     </div> --}}
+
     <div id="pdfModal" class="fixed inset-0 z-[1000] hidden items-center justify-center bg-black/50">
         <div class="bg-white dark:bg-slate-900 rounded-md shadow-lg w-full max-w-4xl h-[90vh] flex flex-col border border-gray-100 dark:border-slate-700 overflow-hidden">
 
@@ -168,6 +169,7 @@
     //         $(this).data('title')
     //     );
     // });
+
     function renderMemoLinks(containerId, items){
         const el = $('#' + containerId);
         el.empty();
@@ -180,9 +182,11 @@
             el.append(`
             <li>
                 <a href="#"
-                class="open-related-memo text-primary"
-                data-id="${item.id}">
-                📄 ${item.memo_no}
+                    class="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-xs font-medium open-related-memo"
+                    data-id="${item.id}"
+                >
+                    <i class="ri-file-text-line"></i>
+                    <strong>${item.memo_no}</strong>
                 </a>
             </li>
             `);

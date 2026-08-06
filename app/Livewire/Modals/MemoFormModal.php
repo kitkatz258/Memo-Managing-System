@@ -8,6 +8,7 @@ use App\Models\Category;
 use App\Models\EmployeeRank;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 use Livewire\Attributes\On;
@@ -46,12 +47,17 @@ class MemoFormModal extends Component
     {
         return [
             'title' => 'required|string|max:255',
-            'memoNo' => 'nullable|string|max:100',
+            'memoNo' => [
+                'required',
+                'string',
+                'max:100',
+                Rule::unique('memos', 'memo_no')->ignore($this->editingMemoId),
+            ],
             'year' => 'required|integer|min:1986|max:' . (now()->year + 1),
-            'author' => 'nullable|string|max:255',
+            'author' => 'required|string|max:255',
             'file' => ($this->editingMemoId ? 'nullable' : 'required') . '|file|mimes:pdf|max:40960',
             'selectedCompanies' => $this->forAllCompanies ? 'nullable|array' : 'required|array|min:1',
-            'selectedCategories' => $this->forAllCompanies ? 'nullable|array' : 'required|array|min:1',
+            'selectedCategories' => $this->forAllCategories ? 'nullable|array' : 'required|array|min:1',
             'selectedRanks' => $this->forAllRanks ? 'nullable|array' : 'required|array|min:1',
         ];
     }

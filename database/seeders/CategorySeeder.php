@@ -12,7 +12,7 @@ class CategorySeeder extends Seeder
      */
     public function run(): void
     {
-        $categories = ['HR', 'SALES', 'PID', 'SERVICE', 'ENGR.', 'ACCTG.', 'CMG', 'C&C', 'TREASURY', 'MARKETING/ADVERTISING', 'WAREHOUSE', 'PURCHASING', 'PAYROLL', 'FAAP', 'IT', 'AUDIT'];
+        $categories = ['HR', 'SALES', 'PID', 'SERVICE', 'ENGR.', 'ACCTG.', 'CMG', 'C&C', 'TREASURY', 'MARKETING/ADVERTISING', 'WAREHOUSE', 'PURCHASING', 'PAYROLL', 'FAAP', 'IT', 'AUDIT', 'FACILITIES'];
         foreach($categories as $cat) {
             \App\Models\Category::create(['name' => $cat]);
         }

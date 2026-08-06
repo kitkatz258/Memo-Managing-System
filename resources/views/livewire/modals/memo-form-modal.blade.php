@@ -12,7 +12,7 @@
 
                     <div>
                         <label class="block font-medium mb-1">Title</label>
-                        <input type="text" wire:model="title" class="w-full border rounded p-2">
+                        <input type="text" wire:model.blur="title" class="w-full border rounded p-2">
                         @error('title') <p class="text-red-600 text-sm">{{ $message }}</p> @enderror
                     </div>
 
@@ -20,6 +20,7 @@
                         <div>
                             <label class="block font-medium mb-1">Memo No.</label>
                             <input type="text" wire:model="memoNo" class="w-full border rounded p-2">
+                            @error('memoNo') <p class="text-red-600 text-sm">{{ $message }}</p> @enderror
                         </div>
                         <div>
                             <label class="block font-medium mb-1">Year</label>
@@ -31,6 +32,7 @@
                     <div>
                         <label class="block font-medium mb-1">Author</label>
                         <input type="text" wire:model="author" class="w-full border rounded p-2">
+                        @error('author') <p class="text-red-600 text-sem">{{ $message }}</p> @enderror
                     </div>
 
                     <div>
@@ -40,7 +42,6 @@
                         @endif
                         <input type="file" wire:model="file" accept="application/pdf" class="w-full border rounded p-2">
                         @error('file') <p class="text-red-600 text-sm">{{ $message }}</p> @enderror
-                        <div wire:loading wire:target="file" class="text-sm text-slate-400">Uploading...</div>
                     </div>
 
                     {{-- Companies --}}

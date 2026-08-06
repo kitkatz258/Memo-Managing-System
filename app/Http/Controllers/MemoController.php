@@ -92,22 +92,93 @@ class MemoController extends Controller
             return DataTables::of($query)
                 ->filter(function ($query) use ($request) {
                     if ($search = $request->get('search')['value'] ?? null) {
-                        $query->whereRaw(
+                        $query->where('memo_no', 'like', "%{$search}%")
+                        ->orWhere('title', 'like', "%{$search}%")
+                        ->orWhere('author', 'like', "%{$search}%")
+                        ->whereRaw(
                             "MATCH(title, extracted_content) AGAINST(? IN NATURAL LANGUAGE MODE)",
                             [$search]
                         );
                     }
                 })
                 ->addColumn('company_list', fn($memo) => $memo->for_all_companies ? 'All' : $memo->companies->pluck('code')->join(', '))
-                ->addColumn('category_list', fn($memo) => $memo->for_all_categories ? 'All' : $memo->categories->pluck('name')->join(', '))
                 ->addColumn('rank_list', fn($memo) => $memo->for_all_ranks ? 'All' : $memo->employeeRanks->pluck('name')->join(', '))
-                ->addColumn('superseded_list', fn($memo) => $memo->supersededMemos->pluck('title')->join(', ') ?: '—')
-                ->addColumn('related_list', fn($memo) => $memo->relatedMemos->pluck('title')->join(', ') ?: '—')
-                ->addColumn('created_at_formatted', fn($memo) => $memo->created_at->format('M d, Y'))
+                ->addColumn('category_list', function ($memo) {
+                    if ($memo->for_all_categories) {
+                        return 'All';
+                    }
+
+                    $categories = $memo->categories->pluck('name');
+                    $full = $categories->join(', ');
+                    if ($categories->count() <= 3) {
+                        return $full;
+                    }
+
+                    return '<span title="'.e($full).'">'.$categories->take(3)->join(', ') . ', +' . ($categories->count() - 3).'</span>';
+                })
+                ->addColumn('superseded_list', function ($memo) {
+                    if ($memo->supersededMemos->isEmpty()) {
+                        return '—';
+                    }
+
+                    return $memo->supersededMemos->map(function ($m) {
+                        return '
+                            <button
+                                class="memo-pill bg-indigo-100 hover:bg-indigo-200 text-indigo-700 px-2 py-1 rounded-full text-xs mr-1 mb-1"
+                                data-id="'.$m->id.'"
+                                data-memono="'.e($m->memo_no).'"
+                                data-title="'.e($m->title).'">
+
+                                <i class="ri-file-text-line mr-1"></i>'.e($m->memo_no).'
+                            </button>
+                        ';
+                    })->implode('');
+                })
+                ->addColumn('related_list', function ($memo) {
+                    if ($memo->relatedMemos->isEmpty()) {
+                        return '—';
+                    }
+
+                    return $memo->relatedMemos->map(function ($m) {
+                        return '
+                            <button
+                                class="memo-pill bg-indigo-100 hover:bg-indigo-200 text-indigo-700 px-2 py-1 rounded-full text-xs mr-1 mb-1"
+                                data-id="'.$m->id.'"
+                                data-memono="'.e($m->memo_no).'"
+                                data-title="'.e($m->title).'">
+
+                                <i class="ri-file-text-line mr-1"></i>'.e($m->memo_no).'
+                            </button>
+                        ';
+                    })->implode('');
+                })
+                ->addColumn(
+                    'created_at_formatted',
+                    fn($memo) => $memo->created_at->format('d M Y')
+                )
                 ->addColumn('actions', function ($memo) {
                     return '
-                        <button onclick="Livewire.dispatch(\'open-memo-modal-edit\', { memoId: '.$memo->id.' })" class="text-blue-600 hover:underline mr-3">Edit</button>
-                        <button onclick="archiveMemo('.$memo->id.')" class="text-red-600 hover:underline">Archive</button>
+                        <div class="flex items-center gap-3">
+
+                            <button
+                                onclick="Livewire.dispatch(\'open-memo-modal-edit\', { memoId: '.$memo->id.' })"
+                                class="text-blue-600 hover:text-blue-800"
+                                title="Edit">
+
+                                <i class="ri-pencil-line text-lg"></i>
+
+                            </button>
+
+                            <button
+                                onclick="archiveMemo('.$memo->id.')"
+                                class="text-red-600 hover:text-red-800"
+                                title="Archive">
+
+                                <i class="ri-archive-line text-lg"></i>
+
+                            </button>
+
+                        </div>
                     ';
                 })
                 ->addColumn('memo_no_link', function ($memo) {
@@ -119,7 +190,7 @@ class MemoController extends Controller
                         .e($memo->memo_no).
                     '</button>';
                 })
-                ->rawColumns(['memo_no_link', 'actions'])
+                ->rawColumns(['memo_no_link', 'category_list', 'actions', 'related_list', 'superseded_list'])
                 ->make(true);
         }
 

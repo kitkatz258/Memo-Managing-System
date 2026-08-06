@@ -30,26 +30,28 @@
     </div>
 
     <div class="bg-white dark:bg-slate-900 rounded-md shadow-sm dark:shadow-gray-700 border border-gray-100 dark:border-slate-700 p-6">
-        <table id="memosTable" class="w-full border-collapse">
-            <thead>
-                <tr>
-                    <th>Memo No.</th>
-                    <th>Title</th>
-                    <th>Company</th>
-                    <th>Year</th>
-                    <th>Author</th>
-                    <th>Category</th>
-                    <th>Employee Rank</th>
-                    <th>Superseded</th>
-                    <th>Related</th>
-                    <th>Uploaded</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-        </table>
+        <div class="overflow-x-auto">
+            <table id="memosTable" class="w-full border-collapse">
+                <thead>
+                    <tr>
+                        <th>Memo No.</th>
+                        <th>Title</th>
+                        <th>Company</th>
+                        <th>Year</th>
+                        <th>Author</th>
+                        <th>Category</th>
+                        <th>Employee Rank</th>
+                        <th>Superseded</th>
+                        <th>Related</th>
+                        <th>Uploaded</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+            </table>
+        </div>
     </div>
 
-    <div x-data x-show="$store.pdfViewer.open" x-cloak class="fixed inset-0 z-[1000] flex items-center justify-center bg-black/50" style="display: none;">
+    {{-- <div x-data x-show="$store.pdfViewer.open" x-cloak class="fixed inset-0 z-[1000] flex items-center justify-center bg-black/50" style="display: none;">
         <div class="bg-white dark:bg-slate-900 rounded-md shadow-lg w-full max-w-4xl h-[85vh] flex flex-col border border-gray-100 dark:border-slate-700">
 
             <div class="flex justify-between items-center p-4 border-b border-gray-100 dark:border-slate-700">
@@ -62,6 +64,121 @@
 
             <iframe id="pdfFrame" :src="$store.pdfViewer.url" class="flex-1 w-full"></iframe>
         </div>
+    </div> --}}
+
+    <div id="pdfModal" class="fixed inset-0 z-[1000] hidden items-center justify-center bg-black/50">
+        <div class="bg-white dark:bg-slate-900 rounded-md shadow-lg w-full max-w-4xl h-[90vh] flex flex-col border border-gray-100 dark:border-slate-700 overflow-hidden">
+
+            <div class="flex justify-between items-start p-4 border-b border-gray-100 dark:border-slate-700">
+                <div>
+                    <p class="text-sm text-slate-400">Memo No. <span id="pdfMemoNo" class="font-semibold text-slate-700 dark:text-slate-200"></span></p>
+                    <h3 id="pdfTitle" class="font-bold text-lg dark:text-white mt-1"></h3>
+                    <p id="pdfCategory" class="text-sm text-slate-400"></p>
+                </div>
+                <button id="closePdfModal" class="text-slate-400 hover:text-slate-700 text-xl">&times;</button>
+            </div>
+
+            <div class="grid grid-cols-12 h-[70vh]">
+                <!-- PDF -->
+                <div class="col-span-9 border-r border-slate-700">
+                    <iframe
+                        id="pdfFrame"
+                        :src="$store.pdfViewer.url"
+                        class="w-full h-full">
+                    </iframe>
+                </div>
+
+                <!-- Sidebar -->
+                <div class="col-span-3 flex flex-col">
+
+                    <!-- Scrollable Details -->
+                    <div class="flex-1 overflow-y-auto p-5 space-y-5">
+
+                        <!-- Company -->
+                        <div>
+                            <p class="text-xs uppercase text-slate-400">Company</p>
+                            <div id="modalCompany"></div>
+                        </div>
+
+                        <!-- Categories -->
+                        <div>
+                            <p class="text-xs uppercase text-slate-400">Categories</p>
+                            <div id="modalCategories" class="flex flex-wrap gap-2"></div>
+                        </div>
+
+                        <!-- Employee Rank -->
+                        <div>
+                            <p class="text-xs uppercase text-slate-400">Employee Rank</p>
+                            <div id="modalRanks"></div>
+                        </div>
+
+                        <!-- Author -->
+                        <div>
+                            <p class="text-xs uppercase text-slate-400">Author</p>
+                            <p id="modalAuthor"></p>
+                        </div>
+
+                        <!-- Year -->
+                        <div>
+                            <p class="text-xs uppercase text-slate-400">Year</p>
+                            <p id="modalYear"></p>
+                        </div>
+
+                        <!-- Uploaded -->
+                        <div>
+                            <p class="text-xs uppercase text-slate-400">Uploaded</p>
+                            <p id="modalUploaded"></p>
+                        </div>
+
+                        <!-- Related -->
+                        <div>
+                            <p class="text-xs uppercase text-slate-400">Related</p>
+                            <div id="modalRelated" class="flex flex-wrap gap-2"></div>
+                        </div>
+
+                        <!-- Superseded -->
+                        <div>
+                            <p class="text-xs uppercase text-slate-400">Superseded</p>
+                            <div id="modalSuperseded" class="flex flex-wrap gap-2"></div>
+                        </div>
+
+                        <!-- Superseded By -->
+                        <div>
+                            <p class="text-xs uppercase text-slate-400">Superseded By</p>
+                            <div id="modalSupersededBy" class="flex flex-wrap gap-2"></div>
+                        </div>
+                    </div>
+
+                    <!-- Buttons -->
+                    <div class="border-t border-slate-700 p-4 space-y-2">
+
+                        <a id="downloadBtn"
+                        class="w-full flex justify-center rounded-lg bg-indigo-600 hover:bg-indigo-700 py-2 text-white">
+
+                            <i class="ri-download-line mr-2"></i>
+                            Download
+                        </a>
+
+                        <button id="editBtn"
+                            class="w-full rounded-lg bg-blue-600 hover:bg-blue-700 py-2 text-white">
+                            Edit
+                        </button>
+
+                        <button id="archiveBtn"
+                            class="w-full rounded-lg bg-red-600 hover:bg-red-700 py-2 text-white">
+                            Archive
+                        </button>
+
+                        <button
+                            @click="$store.pdfViewer.close()"
+                            class="w-full rounded-lg border border-slate-600 py-2">
+
+                            Close
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     @if(auth()->user()->role === 'admin')
@@ -72,10 +189,15 @@
 @push('scripts')
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/responsive/2.5.0/js/dataTables.responsive.min.js"></script>
+<link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.5.0/css/responsive.dataTables.min.css">
 <script>
     let table = $('#memosTable').DataTable({
         processing: true,
         serverSide: true,
+
+        autoWidth: false,
+        scrollX: true,
         dom: '<"flex justify-between items-center"l>rt<"flex justify-between items-center"ip>',
         ajax: {
             url: "{{ route('memos.index') }}",
@@ -141,12 +263,91 @@
         });
     }
 
-    $(document).on('click', '.view-pdf-btn', function () {
-        Alpine.store('pdfViewer').show(
-            $(this).data('id'),
-            $(this).data('memono'),
-            $(this).data('title')
-        );
+    function renderMemoLinks(containerId, items){
+        const el = $('#' + containerId);
+        el.empty();
+
+        if(!items || items.length === 0){
+            el.append('<li class="text-slate-400">—</li>');
+            return;
+        }
+        items.forEach(item => {
+            el.append(`
+            <li>
+                <a href="#"
+                    class="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-xs font-medium open-related-memo"
+                    data-id="${item.id}"
+                >
+                    <i class="ri-file-text-line"></i>
+                    <strong>${item.memo_no}</strong>
+                </a>
+            </li>
+            `);
+        })
+    }
+
+    function openPdfViewer(id){
+        fetch(`/memos/${id}/details`)
+            .then(res => res.json())
+            .then(data => {
+                $('#pdfTitle').text(data.title);
+                $('#pdfMemoNo').text(data.memo_no);
+                $('#pdfCategory').text(data.category);
+                $('#pdfCompany').text(data.company);
+                $('#pdfAuthor').text(data.author);
+                $('#pdfYear').text(data.year);
+                $('#pdfFrame').attr('src', `/memos/${id}/view`);
+                $('#pdfDownload').attr('href', `/memos/${id}/download`);
+                $('#pdfModal').data('memo-id', id);
+
+                renderMemoLinks('pdfRelated', data.related);
+                renderMemoLinks('pdfSuperseded', data.superseded);
+                renderMemoLinks('pdfSupersededBy', data.superseded_by);
+
+                $('#pdfModal').removeClass('hidden').addClass('flex');
+            });           
+    }
+
+    $(document).on('click', '.view-pdf-btn', function(){
+        openPdfViewer($(this).data('id'));
+    });
+
+    $(document).on('click', '.memo-pill', function () {
+        openPdfViewer($(this).data('id'));
+    });
+
+    $(document).on('click', '.open-related-memo', function(e){
+        e.preventDefault();
+        openPdfViewer($(this).data('id'));
+    });
+
+    $(document).on('click', '#pdfEdit', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        const id = $('#pdfModal').data('memo-id');
+        $('#closePdfModal').click();
+
+        Livewire.dispatch('open-memo-modal-edit', {
+            memoId: id
+        });
+    });
+
+    $('#pdfArchive').on('click', function () {
+        const id = $('#pdfModal').data('memo-id');
+        $('#closePdfModal').click();
+        archiveMemo(id);
+    });
+
+    $('#closePdfModal').on('click', function(){
+        $('#pdfModal').removeClass('flex').addClass('hidden');
+        $('#pdfFrame').attr('src', '');
+    });
+
+    $('#pdfModal').on('click', function(e){
+        if(e.target === this){
+            $('#closePdfModal').click();
+        }
     });
 </script>
 @endpush
@@ -169,6 +370,8 @@
     }
 
     table.dataTable tbody td {
+        vertical-align: middle;
+        line-height: 1.35;
         padding: 0.9rem 1rem;
         border-bottom: 1px solid #f1f5f9;
         font-size: 0.9rem;
@@ -176,6 +379,14 @@
     .dark table.dataTable tbody td {
         color: #f1f5f9;
         border-bottom-color: #334155;
+    }
+        
+    .view-pdf-btn {
+    cursor: pointer;
+    }
+
+    .view-pdf-btn:hover {
+        cursor: pointer;
     }
 
     table.dataTable tbody tr:hover { background-color: #f8fafc; }
