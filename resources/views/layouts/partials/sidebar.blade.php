@@ -9,18 +9,29 @@
 
         <ul class="sidebar-menu border-t border-white/10" data-simplebar style="height: calc(100% - 70px);">
             @if(auth()->user()->role === 'admin')
-                <li>
-                    <a href="{{ route('dashboard') }}"><i class="ri-layout-line font-normal me-2"></i>Dashboard</a>
+                <li class="{{ request()->routeIs('dashboard') ? 'active' : '' }}">
+                    <a href="{{ route('dashboard') }}">
+                        <i class="ri-layout-line font-normal me-2"></i>
+                        Dashboard
+                    </a>
                 </li>
-            @endif    
+            @endif
 
-            <li>
-                <a href="{{ route('memos.index') }}"><i class="ri-file-list-line font-normal me-2"></i>All Memos</a>
+            <li class="{{ request()->routeIs('memos.index') ? 'active' : '' }}">
+                <a href="{{ route('memos.index') }}"
+                class="{{ request()->routeIs('memos.index') ? 'active' : '' }}">
+                    <i class="ri-file-list-line font-normal me-2"></i>
+                    All Memos
+                </a>
             </li>
 
             @if(auth()->user()->role === 'admin')
-                <li>
-                    <a href="{{ route('memos.archived') }}"><i class="ri-archive-line font-normal me-2"></i>Archives</a>
+                <li class="{{ request()->routeIs('memos.archived') ? 'active' : '' }}">
+                    <a href="{{ route('memos.archived') }}"
+                    class="{{ request()->routeIs('memos.archived') ? 'active' : '' }}">
+                        <i class="ri-archive-line font-normal me-2"></i>
+                        Archives
+                    </a>
                 </li>
             @endif
         </ul>

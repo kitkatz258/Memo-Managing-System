@@ -230,6 +230,13 @@ class MemoFormModal extends Component
         return $query->select('id', 'title')->limit(20)->get();
     }
 
+    public function removeFile()
+    {
+        $this->file = null;
+
+        $this->dispatch('file-removed');
+    }
+
     public function render()
     {
         return view('livewire.modals.memo-form-modal');

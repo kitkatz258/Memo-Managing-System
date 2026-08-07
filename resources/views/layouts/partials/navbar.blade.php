@@ -1,16 +1,20 @@
 <div class="top-header">
     <div class="header-bar flex justify-between">
         <div class="flex items-center space-x-1">
-            <a id="close-sidebar" class="size-8 inline-flex items-center justify-center tracking-wide align-middle duration-500 text-[20px] text-center bg-gray-50 dark:bg-slate-800 hover:bg-gray-100 dark:hover:bg-slate-700 border border-gray-100 dark:border-gray-800 text-slate-900 dark:text-white rounded-full" href="javascript:void(0)">
-                <i class="ri-menu-line"></i>
-            </a>
-
+            @if(request()->routeIs('memos.index') || request()->routeIs('user.memos.index'))
             <div class="ps-1.5">
                 <div class="form-icon relative sm:block hidden">
                     <i class="ri-search-line absolute top-1/2 -translate-y-1/2 inset-s-3"></i>
-                    <input type="text" id="globalSearch" class="form-input w-56 ps-9 py-2 px-3 h-8 bg-transparent dark:bg-slate-900 dark:text-slate-200 rounded-3xl outline-none border border-gray-100 dark:border-gray-800 focus:ring-0" name="s" placeholder="Search memos...">
+
+                    <input
+                        type="text"
+                        id="globalSearch"
+                        class="form-input w-72 ps-9 py-2 px-3 h-8 bg-transparent dark:bg-slate-900 dark:text-slate-200 rounded-3xl outline-none border border-gray-100 dark:border-gray-800"
+                        placeholder="Search memos..."
+                    >
                 </div>
             </div>
+            @endif
         </div>
 
         <ul class="list-none mb-0 space-x-1">

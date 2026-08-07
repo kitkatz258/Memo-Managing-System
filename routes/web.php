@@ -17,9 +17,9 @@ Route::middleware(['auth'])->group(function(){
     Route::get('/memos/search-picker', [MemoController::class, 'searchPicker'])->name('memos.search-picker');
     Route::patch('/memos/{id}/restore', [MemoController::class, 'restore'])->name('memos.restore');
 
-    Route::get('/memos/{memo}/details', [MemoController::class, 'details'])->name('memos.details');
-    Route::get('/memos/{memo}/view', [MemoController::class, 'viewInline'])->name('memos.view');
-    Route::get('/memos/{memo}/download', [MemoController::class, 'download'])->name('memos.download');
+    Route::get('/memos/{memo}/details', [MemoController::class, 'details'])->withTrashed()->name('memos.details');
+    Route::get('/memos/{memo}/view', [MemoController::class, 'viewInline'])->withTrashed()->name('memos.view');
+    Route::get('/memos/{memo}/download', [MemoController::class, 'download'])->withTrashed()->name('memos.download');
     Route::delete('/memos/{memo}', [MemoController::class, 'archive'])->name('memos.archive');
 });
 

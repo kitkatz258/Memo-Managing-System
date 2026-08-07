@@ -37,13 +37,11 @@
                         <th>Memo No.</th>
                         <th>Title</th>
                         <th>Company</th>
-                        <th>Year</th>
                         <th>Author</th>
                         <th>Category</th>
                         <th>Employee Rank</th>
                         <th>Superseded</th>
                         <th>Related</th>
-                        <th>Uploaded</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -51,25 +49,10 @@
         </div>
     </div>
 
-    {{-- <div x-data x-show="$store.pdfViewer.open" x-cloak class="fixed inset-0 z-[1000] flex items-center justify-center bg-black/50" style="display: none;">
-        <div class="bg-white dark:bg-slate-900 rounded-md shadow-lg w-full max-w-4xl h-[85vh] flex flex-col border border-gray-100 dark:border-slate-700">
-
-            <div class="flex justify-between items-center p-4 border-b border-gray-100 dark:border-slate-700">
-                <div>
-                    <h3 class="font-bold dark:text-white" x-text="$store.pdfViewer.title"></h3>
-                    <p class="text-sm text-slate-400">Memo No. <span x-text="$store.pdfViewer.memoNo"></span></p>
-                </div>
-                <button @click="$store.pdfViewer.close()" class="text-slate-400 hover:text-slate-700 text-xl">&times;</button>
-            </div>
-
-            <iframe id="pdfFrame" :src="$store.pdfViewer.url" class="flex-1 w-full"></iframe>
-        </div>
-    </div> --}}
-
     <div id="pdfModal" class="fixed inset-0 z-[1000] hidden items-center justify-center bg-black/50">
-        <div class="bg-white dark:bg-slate-900 rounded-md shadow-lg w-full max-w-4xl h-[90vh] flex flex-col border border-gray-100 dark:border-slate-700 overflow-hidden">
+        <div class="bg-white dark:bg-slate-900 rounded-md shadow-lg w-full max-w-[85vw] h-[90vh] flex flex-col border border-gray-100 dark:border-slate-700 overflow-hidden">
 
-            <div class="flex justify-between items-start p-4 border-b border-gray-100 dark:border-slate-700">
+            <div class="flex justify-between items-start p-4 border-b border-gray-100 dark:border-slate-700 shrink-0">
                 <div>
                     <p class="text-sm text-slate-400">Memo No. <span id="pdfMemoNo" class="font-semibold text-slate-700 dark:text-slate-200"></span></p>
                     <h3 id="pdfTitle" class="font-bold text-lg dark:text-white mt-1"></h3>
@@ -78,112 +61,66 @@
                 <button id="closePdfModal" class="text-slate-400 hover:text-slate-700 text-xl">&times;</button>
             </div>
 
-            <div class="grid grid-cols-12 h-[70vh]">
-                <!-- PDF -->
-                <div class="col-span-9 border-r border-slate-700">
-                    <iframe
-                        id="pdfFrame"
-                        :src="$store.pdfViewer.url"
-                        class="w-full h-full">
-                    </iframe>
-                </div>
+            <div class="flex flex-row flex-1 overflow-hidden">
+                <iframe id="pdfFrame" class="flex-1 w-full"></iframe>
 
-                <!-- Sidebar -->
-                <div class="col-span-3 flex flex-col">
-
-                    <!-- Scrollable Details -->
-                    <div class="flex-1 overflow-y-auto p-5 space-y-5">
-
-                        <!-- Company -->
-                        <div>
-                            <p class="text-xs uppercase text-slate-400">Company</p>
-                            <div id="modalCompany"></div>
-                        </div>
-
-                        <!-- Categories -->
-                        <div>
-                            <p class="text-xs uppercase text-slate-400">Categories</p>
-                            <div id="modalCategories" class="flex flex-wrap gap-2"></div>
-                        </div>
-
-                        <!-- Employee Rank -->
-                        <div>
-                            <p class="text-xs uppercase text-slate-400">Employee Rank</p>
-                            <div id="modalRanks"></div>
-                        </div>
-
-                        <!-- Author -->
-                        <div>
-                            <p class="text-xs uppercase text-slate-400">Author</p>
-                            <p id="modalAuthor"></p>
-                        </div>
-
-                        <!-- Year -->
-                        <div>
-                            <p class="text-xs uppercase text-slate-400">Year</p>
-                            <p id="modalYear"></p>
-                        </div>
-
-                        <!-- Uploaded -->
-                        <div>
-                            <p class="text-xs uppercase text-slate-400">Uploaded</p>
-                            <p id="modalUploaded"></p>
-                        </div>
-
-                        <!-- Related -->
-                        <div>
-                            <p class="text-xs uppercase text-slate-400">Related</p>
-                            <div id="modalRelated" class="flex flex-wrap gap-2"></div>
-                        </div>
-
-                        <!-- Superseded -->
-                        <div>
-                            <p class="text-xs uppercase text-slate-400">Superseded</p>
-                            <div id="modalSuperseded" class="flex flex-wrap gap-2"></div>
-                        </div>
-
-                        <!-- Superseded By -->
-                        <div>
-                            <p class="text-xs uppercase text-slate-400">Superseded By</p>
-                            <div id="modalSupersededBy" class="flex flex-wrap gap-2"></div>
-                        </div>
+                <div class="w-72 shrink-0 border-l border-gray-100 dark:border-slate-700 overflow-y-auto p-4 space-y-4 text-sm">
+                    <div>
+                        <p class="text-m uppercase text-slate-400 flex items-center gap-2">
+                            <i class="ri-building-line"></i>
+                            Company
+                        </p>
+                        <p id="pdfCompany" class="font-medium dark:text-white"></p>
+                    </div>
+                    <div>
+                        <p class="text-m uppercase text-slate-400 flex items-center gap-2">
+                            <i class="ri-user-line"></i>
+                            Author
+                        </p>
+                        <p id="pdfAuthor" class="font-medium dark:text-white"></p>
+                    </div>
+                    <div>
+                        <p class="text-m uppercase text-slate-400 flex items-center gap-2">
+                            <i class="ri-time-line"></i>
+                            Uploaded
+                        </p>
+                        <p id="pdfUploaded" class="font-medium dark:text-white"></p>
                     </div>
 
-                    <!-- Buttons -->
-                    <div class="border-t border-slate-700 p-4 space-y-2">
+                    <div class="border-t border-gray-100 dark:border-slate-700 pt-3">
+                        <p class="text-m uppercase text-slate-400 flex items-center gap-2">
+                            <i class="ri-links-line"></i>
+                            Related Memos
+                        </p>
+                        <ul id="pdfRelated" class="space-y-1"></ul>
+                    </div>
+                    <div>
+                        <p class="text-m uppercase text-slate-400 flex items-center gap-2">
+                            <i class="ri-arrow-right-line"></i>
+                            Superseded Memos
+                        </p>
+                        <ul id="pdfSuperseded" class="space-y-1"></ul>
+                    </div>
+                    <div>
+                        <p class="text-m uppercase text-slate-400 flex items-center gap-2">
+                            <i class="ri-arrow-left-line"></i>
+                            Superseded By
+                        </p>
+                        <ul id="pdfSupersededBy" class="space-y-1"></ul>
+                    </div>
 
-                        <a id="downloadBtn"
-                        class="w-full flex justify-center rounded-lg bg-indigo-600 hover:bg-indigo-700 py-2 text-white">
-
-                            <i class="ri-download-line mr-2"></i>
-                            Download
-                        </a>
-
-                        <button id="editBtn"
-                            class="w-full rounded-lg bg-blue-600 hover:bg-blue-700 py-2 text-white">
-                            Edit
-                        </button>
-
-                        <button id="archiveBtn"
-                            class="w-full rounded-lg bg-red-600 hover:bg-red-700 py-2 text-white">
-                            Archive
-                        </button>
-
-                        <button
-                            @click="$store.pdfViewer.close()"
-                            class="w-full rounded-lg border border-slate-600 py-2">
-
-                            Close
-                        </button>
+                    <div class="border-t border-gray-100 dark:border-slate-700 pt-3 space-y-2">
+                        <a id="pdfDownload" href="#" class="block text-center px-3 py-1.5 rounded-md bg-primary hover:bg-primary-700 text-white text-sm transition">Download</a>
+                            <button id="pdfEdit" class="block w-full text-center px-3 py-1.5 rounded-md border border-blue-200 dark:border-blue-800 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-950 text-sm transition">Edit</button>
+                            <button id="pdfArchive" class="block w-full text-center px-3 py-1.5 rounded-md border border-red-200 dark:border-red-800 text-red-600 hover:bg-red-50 dark:hover:bg-red-950 text-sm transition">Archive</button>
+                        <button onclick="document.getElementById('closePdfModal').click()" class="block w-full text-center px-3 py-1.5 rounded-md border border-gray-200 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-800 dark:text-white text-sm transition">Close</button>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    @if(auth()->user()->role === 'admin')
-        <livewire:modals.memo-form-modal />
-    @endif
+    <livewire:modals.memo-form-modal />
 @endsection
 
 @push('scripts')
@@ -209,15 +146,13 @@
         },
         columns: [
             { data: 'memo_no_link', name: 'memo_no' },
-            { data: 'title', name: 'title' },
+            { data: 'title_with_preview', name: 'title', className: 'align-middle' },
             { data: 'company_list', name: 'company_list', orderable: false, searchable: false },
-            { data: 'year', name: 'year' },
             { data: 'author', name: 'author' },
             { data: 'category_list', name: 'category_list', orderable: false, searchable: false },
             { data: 'rank_list', name: 'rank_list', orderable: false, searchable: false },
             { data: 'superseded_list', name: 'superseded_list', orderable: false, searchable: false },
             { data: 'related_list', name: 'related_list', orderable: false, searchable: false },
-            { data: 'created_at_formatted', name: 'created_at' },
             { data: 'actions', name: 'actions', orderable: false, searchable: false },
         ],
     });
@@ -294,8 +229,8 @@
                 $('#pdfMemoNo').text(data.memo_no);
                 $('#pdfCategory').text(data.category);
                 $('#pdfCompany').text(data.company);
+                $('#pdfUploaded').text(data.uploaded);
                 $('#pdfAuthor').text(data.author);
-                $('#pdfYear').text(data.year);
                 $('#pdfFrame').attr('src', `/memos/${id}/view`);
                 $('#pdfDownload').attr('href', `/memos/${id}/download`);
                 $('#pdfModal').data('memo-id', id);
@@ -355,23 +290,34 @@
 @push('styles')
 <link rel="stylesheet" href="https://cdn.datatables.net/1.13.8/css/jquery.dataTables.min.css">
 <style>
+    .memo-pill{
+        cursor:pointer;
+        transition:.2s;
+    }
+
+    .memo-pill:hover{
+        transform:translateY(-1px);
+        background:#635BFF;
+        color:white;
+    }
     table.dataTable thead th {
         font-weight: 600;
         font-size: 0.8125rem;
+        text-align: center;
         text-transform: uppercase;
         letter-spacing: 0.03em;
         color: #64748b;
-        padding: 0.85rem 1rem;
+        padding: 1.1rem 1rem;
         border-bottom: 2px solid #e2e8f0;
     }
     .dark table.dataTable thead th {
         color: #cbd5e1;
         border-bottom-color: #475569;
     }
-
     table.dataTable tbody td {
         vertical-align: middle;
         line-height: 1.35;
+        text-align: center;
         padding: 0.9rem 1rem;
         border-bottom: 1px solid #f1f5f9;
         font-size: 0.9rem;
@@ -389,7 +335,13 @@
         cursor: pointer;
     }
 
-    table.dataTable tbody tr:hover { background-color: #f8fafc; }
+    table.dataTable tbody tr{
+        transition:.2s;
+    }
+
+    table.dataTable tbody tr:hover{
+        background: #fafafa;
+    }
     .dark table.dataTable tbody tr:hover { background-color: #1e293b; }
 
     table.dataTable tbody tr:last-child td { border-bottom: none; }

@@ -25,11 +25,16 @@ class UserMemoController extends Controller
 
             return DataTables::of($query)
                 ->filter(function ($query) use ($request){
-                    if($search = $request->get('search')['value'] ?? null) {
-                        $query->whereRaw(
-                            "MATCH(title, extracted_content) AGAINST(? IN NATURAL LANGUAGE MODE)",
-                            [$search]
-                        );
+                    if ($search = $request->get('search')['value'] ?? null) {
+                        $query->where(function ($q) use ($search) {
+                            $q->where('memo_no', 'like', "%{$search}%")
+                            ->orWhere('title', 'like', "%{$search}%")
+                            ->orWhere('author', 'like', "%{$search}%")
+                            ->whereRaw(
+                                "MATCH(title, extracted_content) AGAINST(? IN NATURAL LANGUAGE MODE)",
+                                [$search]
+                            );
+                        });
                     }
                 })
                 ->addColumn('company_list', fn($memo) =>
