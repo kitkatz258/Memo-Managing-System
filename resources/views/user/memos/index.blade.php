@@ -29,7 +29,7 @@
                     <th>Title</th>
                     <th>Company</th>
                     <th>Author</th>
-                    <th>Category</th>
+                    <th>Department</th>
                     <th>Superseded</th>
                     <th>Related</th>
                 </tr>

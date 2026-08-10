@@ -10,7 +10,7 @@
                     <th>Memo No.</th>
                     <th>Title</th>
                     <th>Company</th>
-                    <th>Category</th>
+                    <th>Department</th>
                     <th>Archived On</th>
                     <th>Actions</th>
                 </tr>
