@@ -198,7 +198,7 @@ class MemoController extends Controller
                     ';
                 })
                 ->addColumn('title_with_preview', function ($memo) use ($request) {
-                    $search = trim($request->get('search')['value'] ?? '');
+                    $search = trim($request->input('search.value', ''));
 
                     if ($search === '') {
                         return '
@@ -212,10 +212,14 @@ class MemoController extends Controller
                     $content = preg_replace('/\s+/', ' ', $content);
                     $content = trim($content);
 
-                    $searchWords = preg_split('/\s+/', $search, -1, PREG_SPLIT_NO_EMPTY);
+                    $searchWords = preg_split(
+                        '/\s+/',
+                        $search,
+                        -1,
+                        PREG_SPLIT_NO_EMPTY
+                    );
 
                     $position = false;
-                    $matchedWord = null;
 
                     foreach ($searchWords as $word) {
                         $word = trim($word);
@@ -229,12 +233,11 @@ class MemoController extends Controller
                         if ($foundPosition !== false) {
                             if ($position === false || $foundPosition < $position) {
                                 $position = $foundPosition;
-                                $matchedWord = $word;
                             }
                         }
                     }
 
-                    if ($position === false || $matchedWord === null) {
+                    if ($position === false) {
                         return '
                             <div class="font-medium text-slate-800 dark:text-slate-200">
                                 ' . e($memo->title) . '
@@ -257,11 +260,21 @@ class MemoController extends Controller
 
                     $snippet = e($snippet);
 
-                    $snippet = preg_replace(
-                        '/' . preg_quote(e($matchedWord), '/') . '/iu',
-                        '<mark class="bg-yellow-200 dark:bg-yellow-500/30 text-slate-900 dark:text-yellow-200 rounded px-0.5">$0</mark>',
-                        $snippet
-                    );
+                    foreach ($searchWords as $word) {
+                        $word = trim($word);
+
+                        if ($word === '') {
+                            continue;
+                        }
+
+                        $escapedWord = e($word);
+
+                        $snippet = preg_replace(
+                            '/' . preg_quote($escapedWord, '/') . '/iu',
+                            '<mark class="bg-yellow-200 dark:bg-yellow-500/30 text-slate-900 dark:text-yellow-200 rounded px-0.5">$0</mark>',
+                            $snippet
+                        );
+                    }
 
                     return '
                         <div class="min-w-[260px] max-w-[420px]">

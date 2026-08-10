@@ -132,7 +132,7 @@
                             <div>
                                 <label class="inline-flex items-center mb-1">
                                     <input type="checkbox" id="allCategoriesCheckbox" onchange="toggleAllCategories(this.checked)">
-                                    <span class="ml-2 font-medium dark:text-white">All Categories</span>
+                                    <span class="ml-2 font-medium dark:text-white">All Departments</span>
                                 </label>
 
                                 <div wire:ignore x-data x-init="

@@ -12,7 +12,7 @@
             @endforeach
         </select>
 
-        <label class="font-medium">Category:</label>
+        <label class="font-medium">Department:</label>
         <select id="categoryFilter" class="border rounded-md p-2 dark:bg-slate-800 dark:border-slate-700 dark:text-white">
             <option value="">All</option>
             @foreach($categories as $category)

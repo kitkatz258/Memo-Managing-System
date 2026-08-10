@@ -32,6 +32,8 @@
         </main>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
     <script src="{{ asset('vendor/techwind/libs/gumshoejs/gumshoe.polyfills.min.js') }}"></script>
     <script src="{{ asset('vendor/techwind/libs/shufflejs/shuffle.min.js') }}"></script>
     <script src="{{ asset('vendor/techwind/libs/tobii/js/tobii.min.js') }}"></script>
