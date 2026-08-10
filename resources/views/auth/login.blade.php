@@ -1,5 +1,5 @@
 <x-guest-layout>
-    <div class="min-h-screen bg-cover bg-center relative"
+    <div class="login-page min-h-screen bg-cover bg-center relative"
         style="background-image:url('{{ asset('images/login-bg.jpg') }}');">
 
         <!-- Dark Overlay -->
@@ -39,7 +39,11 @@
                             value="{{ old('username') }}"
                             required
                             autofocus
-                            class="w-full rounded-lg border-gray-300 focus:ring-indigo-500 focus:border-indigo-500"
+                            autocomplete="username"
+                            class="w-full h-11 px-4 rounded-lg border border-gray-300 !bg-white text-gray-800
+                                placeholder-gray-400
+                                focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500
+                                transition"
                         >
 
                         @error('username')
@@ -49,7 +53,6 @@
 
                     <!-- Password -->
                     <div class="mb-6">
-
                         <label class="block mb-2 font-semibold text-gray-700">
                             Password
                         </label>
@@ -58,36 +61,24 @@
                             type="password"
                             name="password"
                             required
-                            class="w-full rounded-lg border-gray-300 focus:ring-indigo-500 focus:border-indigo-500"
+                            autocomplete="current-password"
+                            class="w-full h-11 px-4 rounded-lg border border-gray-300 !bg-white text-gray-800
+                                placeholder-gray-400
+                                focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500
+                                transition"
                         >
 
                         @error('password')
                             <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
                         @enderror
-
                     </div>
 
-                    <!-- Remember -->
-                    <div class="flex items-center mb-6">
-
-                        <input
-                            id="remember_me"
-                            type="checkbox"
-                            name="remember"
-                            class="rounded border-gray-300 text-indigo-600"
-                        >
-
-                        <label for="remember_me" class="ml-2 text-sm text-gray-600">
-                            Remember Me
-                        </label>
-
-                    </div>
-
+                    <!-- Login -->
                     <button
-                        class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-lg font-semibold transition">
-
+                        type="submit"
+                        class="w-full bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800
+                            text-white py-3 rounded-lg font-semibold transition">
                         Login
-
                     </button>
 
                 </form>

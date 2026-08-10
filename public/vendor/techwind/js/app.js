@@ -119,21 +119,7 @@ function activateMenu() {
 
 //Admin Menu
 function activateSidebarMenu() {
-    var current = location.pathname.substring(location.pathname.lastIndexOf('/') + 1);
-    if (current !== "" && document.getElementById("sidebar")){
-        var menuItems = document.querySelectorAll('#sidebar a');
-        for (var i = 0, len = menuItems.length; i < len; i++) {
-            if (menuItems[i].getAttribute("href").indexOf(current) !== -1) {
-                menuItems[i].parentElement.className += " active";
-                if(menuItems[i].closest(".sidebar-submenu")) {
-                    menuItems[i].closest(".sidebar-submenu").classList.add("block");
-                }
-                if(menuItems[i].closest(".sidebar-dropdown")) {
-                    menuItems[i].closest(".sidebar-dropdown").classList.add("active");
-                }
-            }
-        }
-    }
+    return;
 }
 
 if(document.getElementById("close-sidebar")){

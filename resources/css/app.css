@@ -11,6 +11,22 @@
     --color-primary-700: #432dd7;
 }
 
+.login-page input:not([type="checkbox"]):not([type="radio"]) {
+    background-color: #ffffff !important;
+    color: #1e293b !important;
+    border-color: #d1d5db !important;
+}
+
+.login-page input:not([type="checkbox"]):not([type="radio"]):focus {
+    background-color: #ffffff !important;
+    color: #1e293b !important;
+    border-color: var(--color-primary) !important;
+}
+
+.login-page input::placeholder {
+    color: #64748b !important;
+}
+
 button, [role="button"], input[type="radio"], select {
   cursor: pointer;
 }

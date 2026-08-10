@@ -91,20 +91,22 @@ class MemoController extends Controller
 
             return DataTables::of($query)
                 ->filter(function ($query) use ($request) {
-                    if ($search = $request->get('search')['value'] ?? null) {
-                        $query->where(function ($q) use ($search) {
+                    $search = trim($request->input('search.value', ''));
 
-                            $q->where('memo_no', 'like', "%{$search}%")
-                            ->orWhere('title', 'like', "%{$search}%")
-                            ->orWhere('author', 'like', "%{$search}%")
-                            ->orWhere('year', 'like', "%{$search}%")
-                            ->orWhereRaw(
-                                    "MATCH(title, extracted_content) AGAINST(? IN NATURAL LANGUAGE MODE)",
-                                    [$search . '*']
-                            );
-
-                        });
+                    if ($search === '') {
+                        return;
                     }
+
+                    $query->where(function ($q) use ($search) {
+                        $q->where('memo_no', 'LIKE', "%{$search}%")
+                        ->orWhere('title', 'LIKE', "%{$search}%")
+                        ->orWhere('author', 'LIKE', "%{$search}%")
+                        ->orWhere('year', 'LIKE', "%{$search}%")
+                        ->orWhereRaw(
+                            "MATCH(title, extracted_content) AGAINST(? IN NATURAL LANGUAGE MODE)",
+                            [$search]
+                        );
+                    });
                 })
                 ->addColumn('company_list', function($memo) {
                     if ($memo->for_all_companies) {
@@ -209,8 +211,30 @@ class MemoController extends Controller
                     $content = strip_tags($memo->extracted_content ?? '');
                     $content = preg_replace('/\s+/', ' ', $content);
                     $content = trim($content);
-                    $position = mb_stripos($content, $search);
-                    if ($position === false) {
+
+                    $searchWords = preg_split('/\s+/', $search, -1, PREG_SPLIT_NO_EMPTY);
+
+                    $position = false;
+                    $matchedWord = null;
+
+                    foreach ($searchWords as $word) {
+                        $word = trim($word);
+
+                        if ($word === '') {
+                            continue;
+                        }
+
+                        $foundPosition = mb_stripos($content, $word);
+
+                        if ($foundPosition !== false) {
+                            if ($position === false || $foundPosition < $position) {
+                                $position = $foundPosition;
+                                $matchedWord = $word;
+                            }
+                        }
+                    }
+
+                    if ($position === false || $matchedWord === null) {
                         return '
                             <div class="font-medium text-slate-800 dark:text-slate-200">
                                 ' . e($memo->title) . '
@@ -222,6 +246,7 @@ class MemoController extends Controller
                     $length = 220;
 
                     $snippet = mb_substr($content, $start, $length);
+
                     if ($start > 0) {
                         $snippet = '...' . $snippet;
                     }
@@ -231,9 +256,10 @@ class MemoController extends Controller
                     }
 
                     $snippet = e($snippet);
+
                     $snippet = preg_replace(
-                        '/(' . preg_quote(e($search), '/') . ')/iu',
-                        '<mark class="bg-yellow-200 dark:bg-yellow-500/30 text-slate-900 dark:text-yellow-200 rounded px-0.5">$1</mark>',
+                        '/' . preg_quote(e($matchedWord), '/') . '/iu',
+                        '<mark class="bg-yellow-200 dark:bg-yellow-500/30 text-slate-900 dark:text-yellow-200 rounded px-0.5">$0</mark>',
                         $snippet
                     );
 
@@ -242,6 +268,7 @@ class MemoController extends Controller
                             <div class="font-medium text-slate-800 dark:text-slate-200">
                                 ' . e($memo->title) . '
                             </div>
+
                             <div class="mt-1 text-xs leading-5 text-slate-500 dark:text-slate-400 line-clamp-2">
                                 ' . $snippet . '
                             </div>

@@ -79,7 +79,14 @@
                     </div>
 
                     <div class="border-t border-gray-100 dark:border-slate-700 pt-3 space-y-2">
-                        <a id="pdfDownload" href="#" class="block text-center px-3 py-1.5 rounded-md bg-primary hover:bg-primary-700 text-white text-sm transition">Download</a>
+                        <button
+                            type="button"
+                            id="restorePdfMemo"
+                            class="block w-full text-center px-3 py-1.5 rounded-md bg-emerald-600 hover:bg-emerald-700 text-white text-sm transition">
+                            <i class="ri-refresh-line me-1"></i>
+                            Restore
+                        </button>
+                        <a id="pdfDownload" href="#" class="block text-center px-3 py-1.5 rounded-md bg-primary hover:bg-primary-700 text-white text-sm transition"><i class="ri-download-2-fill"></i> Download</a>
                         <button onclick="document.getElementById('closePdfModal').click()" class="block w-full text-center px-3 py-1.5 rounded-md border border-gray-200 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-800 dark:text-white text-sm transition">Close</button>
                     </div>
                 </div>
@@ -90,7 +97,6 @@
 
 @push('styles')
 <link rel="stylesheet" href="https://cdn.datatables.net/1.13.8/css/jquery.dataTables.min.css">
-{{-- reuse the same dark-mode table styles from memos/index.blade.php --}}
 @endpush
 
 @push('scripts')
@@ -98,6 +104,8 @@
 <script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
 <script>
     $(function () {
+        let currentMemoId = null;
+
         let archivedTable = $('#archivedTable').DataTable({
             processing: true,
             serverSide: true,
@@ -106,72 +114,81 @@
 
             ajax: "{{ route('memos.archived') }}",
             columns: [
-                {
-                    data: 'memo_no_link',
-                    name: 'memo_no',
-                    className: 'text-center'
-                },
-                {
-                    data: 'title',
-                    name: 'title'
-                },
-                {
-                    data: 'company_list',
-                    name: 'company_list',
-                    orderable: false,
-                    searchable: false
-                },
-                {
-                    data: 'category_list',
-                    name: 'category_list',
-                    orderable: false,
-                    searchable: false
-                },
-                {
-                    data: 'deleted_at_formatted',
-                    name: 'deleted_at',
-                    className: 'text-center'
-                },
-                {
-                    data: 'actions',
-                    orderable: false,
-                    searchable: false,
-                    className: 'text-center'
-                }
+                { data: 'memo_no_link', name: 'memo_no', className: 'text-center'},
+                { data: 'title', name: 'title' },
+                { data: 'company_list', name: 'company_list', orderable: false, searchable: false },
+                { data: 'category_list', name: 'category_list', orderable: false, searchable: false },
+                { data: 'deleted_at_formatted', name: 'deleted_at', className: 'text-center' },
+                { data: 'actions', orderable: false, searchable: false, className: 'text-center' }
             ]
         });
 
-        window.restoreMemo = function(id){
+        window.restoreMemo = function(id) {
             Swal.fire({
                 title: 'Restore memo?',
+                text: 'This memo will be moved back to All Memos.',
                 icon: 'question',
                 showCancelButton: true,
-                confirmButtonText: 'Restore'
-            }).then((result)=>{
-                if(!result.isConfirmed) return;
+                confirmButtonText: 'Restore',
+                cancelButtonText: 'Cancel'
+            }).then((result) => {
 
-                $.ajax({
-                    url: '/memos/'+id+'/restore',
+                if (!result.isConfirmed) {
+                    return;
+                }
+
+                fetch(`/memos/${id}/restore`, {
                     method: 'PATCH',
-                    headers:{
-                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                    },
-                    success:function(){
-
-                        archivedTable.ajax.reload(null,false);
-
-                        Swal.fire({
-                            toast:true,
-                            position:'top-end',
-                            icon:'success',
-                            title:'Memo restored',
-                            timer:2000,
-                            showConfirmButton:false
-                        });
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                        'Accept': 'application/json'
                     }
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`Restore failed: ${response.status}`);
+                    }
+
+                    return response.json();
+                })
+                .then(data => {
+                    $('#pdfModal').removeClass('flex').addClass('hidden');
+                    $('#pdfFrame').attr('src', '');
+
+                    currentMemoId = null;
+
+                    archivedTable.ajax.reload(null, false);
+
+                    Swal.fire({
+                        toast: true,
+                        position: 'top-end',
+                        icon: 'success',
+                        title: 'Memo restored',
+                        showConfirmButton: false,
+                        timer: 2000
+                    });
+
+                })
+                .catch(error => {
+                    console.error('Restore error:', error);
+
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Restore failed',
+                        text: 'The memo could not be restored.'
+                    });
                 });
             });
         };
+
+        $(document).on('click', '#restorePdfMemo', function () {
+            if (!currentMemoId) {
+                console.error('No memo ID available for restore.');
+                return;
+            }
+
+            restoreMemo(currentMemoId);
+        });
 
     function renderMemoLinks(containerId, items){
         const el = $('#' + containerId);
@@ -197,6 +214,8 @@
     }
 
     function openPdfViewer(id){
+        currentMemoId = id;
+
         fetch(`/memos/${id}/details`)
             .then(res => res.json())
             .then(data => {
@@ -210,8 +229,6 @@
 
                 $('#pdfFrame').attr('src', `/memos/${id}/view`);
                 $('#pdfDownload').attr('href', `/memos/${id}/download`);
-
-                $('#pdfModal').data('memo-id', id);
 
                 renderMemoLinks('pdfRelated', data.related);
                 renderMemoLinks('pdfSuperseded', data.superseded);

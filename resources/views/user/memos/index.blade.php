@@ -19,14 +19,6 @@
                 <option value="{{ $category->id }}">{{ $category->name }}</option>
             @endforeach
         </select>
-
-        <label class="font-medium">Employee Rank:</label>
-        <select id="rankFilter" class="border rounded-md p-2 dark:bg-slate-800 dark:border-slate-700 dark:text-white">
-            <option value="">All</option>
-            @foreach($employeeRanks as $rank)
-                <option value="{{ $rank->id }}">{{ $rank->name }}</option>
-            @endforeach
-        </select>
     </div>
 
     <div class="bg-white dark:bg-slate-900 rounded-md shadow-sm dark:shadow-gray-700 border border-gray-100 dark:border-slate-700 p-6">
@@ -38,7 +30,6 @@
                     <th>Company</th>
                     <th>Author</th>
                     <th>Category</th>
-                    <th>Employee Rank</th>
                     <th>Superseded</th>
                     <th>Related</th>
                 </tr>
@@ -107,7 +98,7 @@
                     </div>
 
                     <div class="border-t border-gray-100 dark:border-slate-700 pt-3 space-y-2">
-                        <a id="pdfDownload" href="#" class="block text-center px-3 py-1.5 rounded-md bg-primary text-white text-sm">Download</a>
+                        <a id="pdfDownload" href="#" class="block text-center px-3 py-1.5 rounded-md bg-primary text-white text-sm"><i class="ri-download-2-fill"></i> Download</a>
                         <button onclick="document.getElementById('closePdfModal').click()" class="block w-full text-center px-3 py-1.5 rounded-md border border-gray-200 dark:border-slate-700 text-sm dark:text-white">Close</button>
                     </div>
                 </div>
@@ -126,7 +117,7 @@
         serverSide: true,
         dom: '<"flex justify-between items-center"l>rt<"flex justify-between items-center"ip>',
         ajax: {
-            url: "{{ route('memos.index') }}",
+            url: "{{ route('user.memos.index') }}",
             data: function (d) {
                 d.company_id = $('#companyFilter').val();
                 d.category_id = $('#categoryFilter').val();
@@ -135,11 +126,10 @@
         },
         columns: [
             { data: 'memo_no_link', name: 'memo_no' },
-            { data: 'title', name: 'title' },
+            { data: 'title_with_preview', name: 'title' },
             { data: 'company_list', name: 'company_list', orderable: false, searchable: false },
             { data: 'author', name: 'author' },
             { data: 'category_list', name: 'category_list', orderable: false, searchable: false },
-            { data: 'rank_list', name: 'rank_list', orderable: false, searchable: false },
             { data: 'superseded_list', name: 'superseded_list', orderable: false, searchable: false },
             { data: 'related_list', name: 'related_list', orderable: false, searchable: false },
         ],
@@ -194,18 +184,21 @@
                 $('#pdfMemoNo').text(data.memo_no);
                 $('#pdfCategory').text(data.category);
                 $('#pdfCompany').text(data.company);
-                $('#pdfYear').text(data.year);
+                $('#pdfUploaded').text(data.uploaded);
                 $('#pdfAuthor').text(data.author);
+
                 $('#pdfFrame').attr('src', `/memos/${id}/view`);
                 $('#pdfDownload').attr('href', `/memos/${id}/download`);
-                $('#pdfModal').data('memo-id', id);
 
                 renderMemoLinks('pdfRelated', data.related);
                 renderMemoLinks('pdfSuperseded', data.superseded);
                 renderMemoLinks('pdfSupersededBy', data.superseded_by);
 
                 $('#pdfModal').removeClass('hidden').addClass('flex');
-            });           
+            })
+            .catch(error => {
+                console.error('Failed to load memo preview:', error);
+            });
     }
 
     $(document).on('click', '.view-pdf-btn', function(){

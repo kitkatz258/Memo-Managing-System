@@ -110,9 +110,9 @@
                     </div>
 
                     <div class="border-t border-gray-100 dark:border-slate-700 pt-3 space-y-2">
-                        <a id="pdfDownload" href="#" class="block text-center px-3 py-1.5 rounded-md bg-primary hover:bg-primary-700 text-white text-sm transition">Download</a>
-                            <button id="pdfEdit" class="block w-full text-center px-3 py-1.5 rounded-md border border-blue-200 dark:border-blue-800 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-950 text-sm transition">Edit</button>
-                            <button id="pdfArchive" class="block w-full text-center px-3 py-1.5 rounded-md border border-red-200 dark:border-red-800 text-red-600 hover:bg-red-50 dark:hover:bg-red-950 text-sm transition">Archive</button>
+                        <a id="pdfDownload" href="#" class="block text-center px-3 py-1.5 rounded-md bg-primary hover:bg-primary-700 text-white text-sm transition"><i class="ri-download-2-fill"></i> Download</a>
+                            <button id="pdfEdit" class="block w-full text-center px-3 py-1.5 rounded-md border border-blue-200 dark:border-blue-800 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-950 text-sm transition"><i class="ri-pencil-line"></i> Edit</button>
+                            <button id="pdfArchive" class="block w-full text-center px-3 py-1.5 rounded-md border border-red-200 dark:border-red-800 text-red-600 hover:bg-red-50 dark:hover:bg-red-950 text-sm transition"><i class="ri-archive-line"></i> Archive</button>
                         <button onclick="document.getElementById('closePdfModal').click()" class="block w-full text-center px-3 py-1.5 rounded-md border border-gray-200 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-800 dark:text-white text-sm transition">Close</button>
                     </div>
                 </div>
