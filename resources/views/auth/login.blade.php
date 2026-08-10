@@ -39,11 +39,7 @@
                             value="{{ old('username') }}"
                             required
                             autofocus
-                            autocomplete="username"
-                            class="w-full h-11 px-4 rounded-lg border border-gray-300 !bg-white text-gray-800
-                                placeholder-gray-400
-                                focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500
-                                transition"
+                            class="w-full rounded-lg border-gray-300 bg-white text-gray-800 placeholder-gray-300 focus:ring-indigo-500 focus:border-indigo-500"
                         >
 
                         @error('username')
@@ -61,11 +57,7 @@
                             type="password"
                             name="password"
                             required
-                            autocomplete="current-password"
-                            class="w-full h-11 px-4 rounded-lg border border-gray-300 !bg-white text-gray-800
-                                placeholder-gray-400
-                                focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500
-                                transition"
+                            class="w-full rounded-lg border-gray-300 bg-white text-gray-800 placeholder-gray-300 focus:ring-indigo-500 focus:border-indigo-500"
                         >
 
                         @error('password')
