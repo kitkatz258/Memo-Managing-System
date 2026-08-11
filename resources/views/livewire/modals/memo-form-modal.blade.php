@@ -28,7 +28,7 @@
 
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
 
-                        {{-- LEFT COLUMN: basic fields --}}
+                        {{-- LEFT COLUMN --}}
                         <div class="space-y-5">
                             <div>
                                 <label class="block font-medium mb-1 dark:text-white">Title</label>
@@ -74,6 +74,9 @@
                                         },
                                         onChange: function(values) {
                                             $wire.set('selectedSupersededMemos', values);
+                                        },
+                                        onItemAdd: function(value, item) {
+                                            this.setTextboxValue('');
                                         }
                                     });
                                     Livewire.on('set-superseded-values', (event) => {
@@ -90,7 +93,7 @@
                             </div>
                         </div>
 
-                        {{-- RIGHT COLUMN: classification fields --}}
+                        {{-- RIGHT COLUMN --}}
                         <div class="space-y-5">
 
                             {{-- Companies --}}
@@ -211,6 +214,9 @@
                                         },
                                         onChange: function(values) {
                                             $wire.set('selectedRelatedMemos', values);
+                                        },
+                                        onItemAdd: function(value, item) {
+                                            this.setTextboxValue('');
                                         }
                                     });
                                     Livewire.on('set-related-values', (event) => {
@@ -225,7 +231,7 @@
                                     <select multiple x-ref="relatedSelect"></select>
                                 </div>
                             </div>
-                        </div>
+                            </div>
                         </div>
 
                         <div
