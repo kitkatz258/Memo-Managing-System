@@ -178,11 +178,30 @@
 
     function openPdfViewer(id){
         fetch(`/memos/${id}/details`)
-            .then(res => res.json())
+            .then(async (res) => {
+                if (res.status === 403) {
+                    const body = await res.json().catch(() => ({}));
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Access Restricted',
+                        text: body.message || 'You do not have access to view this memo.',
+                        confirmButtonColor: '#635BFF',
+                    });
+                    return null;
+                }
+
+                if (!res.ok) {
+                    throw new Error('Failed to load memo preview');
+                }
+
+                return res.json();
+            })
             .then(data => {
+                if (!data) return;
+
                 $('#pdfTitle').text(data.title);
                 $('#pdfMemoNo').text(data.memo_no);
-                $('#pdfDepartment').text(data.department);
+                $('#pdfDepartment').text(data.departments);
                 $('#pdfCompany').text(data.company);
                 $('#pdfUploaded').text(data.uploaded);
                 $('#pdfAuthor').text(data.author);

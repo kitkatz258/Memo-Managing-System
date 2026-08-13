@@ -122,7 +122,7 @@
 
     {{-- History Modal --}}
     <div id="historyModal" class="hidden fixed inset-0 z-[1000] items-center justify-center bg-black/50">
-        <div class="bg-white dark:bg-slate-900 rounded-md shadow-lg w-full max-w-[750px] max-h-[85vh] overflow-y-auto border border-gray-100 dark:border-slate-700 p-6 m-4">
+        <div class="bg-white dark:bg-slate-900 rounded-md shadow-lg w-full max-w-[900px] max-h-[85vh] overflow-y-auto border border-gray-100 dark:border-slate-700 p-6 m-4">
             <div class="flex justify-between items-center mb-4">
                 <h3 class="text-xl font-bold dark:text-white">Memo History</h3>
                 <button onclick="closeHistoryModal()" class="text-slate-400 hover:text-slate-700 dark:hover:text-white transition text-xl">&times;</button>

@@ -174,6 +174,12 @@ class MemoFormModal extends Component
             $data['extracted_content'] = $extractedContent;
         }
 
+        $oldMemo = null;
+        if($this->editingMemoId){
+            $oldMemo = Memo::with(['companies', 'departments', 'employeeRanks'])
+                ->findOrFail($this->editingMemoId);
+        }
+
         $isEditing = (bool) $this->editingMemoId;
 
         if($isEditing){
@@ -183,12 +189,6 @@ class MemoFormModal extends Component
             $data['uploaded_by'] = auth()->id();
             $memo = Memo::create($data);
         }
-
-        MemoLog::create([
-            'memo_id' => $memo->id,
-            'user_id' => auth()->id(),
-            'action' => $isEditing ? 'edited' : 'uploaded',
-        ]);
 
         $memo->companies()->sync($this->forAllCompanies ? [] : $this->selectedCompanies);
         $memo->departments()->sync($this->selectedDepartments);
@@ -203,9 +203,89 @@ class MemoFormModal extends Component
             ]);
         }
 
+        $remarks = null;
+
+        if ($isEditing && $oldMemo) {
+            $memo->load(['companies', 'departments', 'employeeRanks']);
+            $remarks = $this->buildEditSummary($oldMemo, $memo);
+        }
+
+        MemoLog::create([
+            'memo_id' => $memo->id,
+            'user_id' => auth()->id(),
+            'action' => $isEditing ? 'edited' : 'uploaded',
+            'remarks' => $remarks,
+        ]);
+
         $this->showModal = false;
         $this->dispatch('memo-saved');
         session()->flash('success', 'Memo saved successfully.');
+    }
+
+    private function buildEditSummary(Memo $old, Memo $new): ?string
+    {
+        $changes = [];
+
+        $fields = [
+            'title' => 'Title',
+            'memo_no' => 'Memo No.',
+            'year' => 'Year',
+            'author' => 'Author',
+        ];
+
+        foreach ($fields as $field => $label){
+            if($old->{$field} != $new->{$field}){
+                $changes[] = "{$label} changed from \"{$old->{$field}}\" to \"{$new->{$field}}\"";
+            }
+        }
+
+        $flagFields = [
+            'for_all_companies' => 'All Companies',
+            'for_all_departments' => 'All Departments',
+            'for_all_ranks' => 'All Ranks',
+        ];
+
+        foreach($flagFields as $field => $label){
+            if($old->{$field} != $new->{$field}){
+                $changes[] = $new->{$field}
+                    ? "Set to visible for {$label}"
+                    : "Removed \"{$label}\" restriction, now uses specific selections";
+            }
+        }
+
+        $changes = array_merge(
+            $changes,
+            $this->diffRelation($old->companies, $new->companies, 'company'),
+            $this->diffRelation($old->departments, $new->departments, 'department'),
+            $this->diffRelation($old->employeeRanks, $new->employeeRanks, 'rank')
+        );
+
+        if(empty($changes)){
+            return null;
+        }
+
+        return implode('; ', $changes);
+    }
+
+    private function diffRelation($oldItems, $newItems, string $label): array
+    {
+        $oldIds = $oldItems->pluck('id');
+        $newIds = $newItems->pluck('id');
+
+        $added = $newItems->whereIn('id', $newIds->diff($oldIds))->pluck('code');
+        $removed = $oldItems->whereIn('id', $oldIds->diff($newIds))->pluck('code');
+
+        $changes = [];
+
+        foreach($added as $name){
+            $changes[] = "Added {$label}: {$name}";
+        }
+
+        foreach($removed as $name){
+            $changes[] = "Removed {$label}: {$name}";
+        }
+
+        return $changes;
     }
 
     public function closeModal()

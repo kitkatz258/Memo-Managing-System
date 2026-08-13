@@ -127,12 +127,20 @@
             Swal.fire({
                 title: 'Restore memo?',
                 text: 'This memo will be moved back to All Memos.',
+                inputLabel: 'Reason for restoring (required)',
+                input: 'textarea',
+                inputPlaceholder: 'Type your reason here...',
                 icon: 'question',
+                inputValidator: (value) => {
+                    if(!value || !value.trim()){
+                        return 'A remark is required to restore this memo.';
+                    }
+                },
                 showCancelButton: true,
                 confirmButtonText: 'Restore',
-                cancelButtonText: 'Cancel'
+                cancelButtonText: 'Cancel',
+                confirmButtonColor: '#059669'
             }).then((result) => {
-
                 if (!result.isConfirmed) {
                     return;
                 }
@@ -140,22 +148,21 @@
                 fetch(`/memos/${id}/restore`, {
                     method: 'PATCH',
                     headers: {
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Content-Type': 'application/json',
                         'Accept': 'application/json'
-                    }
+                    },
+                    body: JSON.stringify({ remarks: result.value }),
                 })
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error(`Restore failed: ${response.status}`);
+                .then(async (res) => {
+                    const text = await res.text();
+                    let body = {};
+                    try { body = JSON.parse(text); } catch (e) { console.error('Non-JSON response:', text); }
+
+                    if (!res.ok) {
+                        Swal.fire('Error', body.message || 'Something went wrong.', 'error');
+                        return;
                     }
-
-                    return response.json();
-                })
-                .then(data => {
-                    $('#pdfModal').removeClass('flex').addClass('hidden');
-                    $('#pdfFrame').attr('src', '');
-
-                    currentMemoId = null;
 
                     archivedTable.ajax.reload(null, false);
 
@@ -167,11 +174,9 @@
                         showConfirmButton: false,
                         timer: 2000
                     });
-
                 })
                 .catch(error => {
                     console.error('Restore error:', error);
-
                     Swal.fire({
                         icon: 'error',
                         title: 'Restore failed',

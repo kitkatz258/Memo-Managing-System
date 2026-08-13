@@ -318,7 +318,17 @@ class MemoController extends Controller
         ])
         ->findOrFail($memo->id);
 
-        $memo->load(['companies', 'departments', 'supersededMemos', 'relatedMemos', 'supersededMemos']);
+        if (! $memo->isViewableBy(auth()->user())) {
+            return response()->json([
+                'message' => 'You do not have access to view this memo based on your assigned company, department, or rank.',
+            ], 403);
+        }
+
+        MemoLog::create([
+            'memo_id' => $memo->id,
+            'user_id' => auth()->id(),
+            'action' => 'viewed',
+        ]);
 
         return response()->json([
             'id' => $memo->id,
@@ -332,12 +342,6 @@ class MemoController extends Controller
             'related' => $memo->relatedMemos->map(fn($m) => ['id' => $m->id, 'memo_no' => $m->memo_no]),
             'superseded' => $memo->supersededMemos->map(fn($m) => ['id' => $m->id, 'memo_no' => $m->memo_no]),
             'superseded_by' => $memo->supersededByMemos->map(fn($m) => ['id' => $m->id, 'memo_no' => $m->memo_no])
-        ]);
-
-        MemoLog::create([
-            'memo_id' => $memo->id,
-            'user_id' => auth()->id(),
-            'action' => 'viewed',
         ]);
     }
 
@@ -462,17 +466,23 @@ class MemoController extends Controller
     public function viewInline($id)
     {
         $memo = Memo::withTrashed()->findOrFail($id);
+        abort_unless($memo->isViewableBy(auth()->user()), 403, 'You do not have access to view this memo.');
         return response()->file(storage_path('app/public/'.$memo->file_path));
     }
 
     public function download($id)
     {
         $memo = Memo::withTrashed()->findOrFail($id);
+        abort_unless($memo->isViewableBy(auth()->user()), 403, 'You do not have access to view this memo.');
         return response()->download(storage_path('app/public/'.$memo->file_path), $memo->original_filename);
     }
 
-    public function restore($id)
+    public function restore(Request $request, $id)
     {
+        $request->validate([
+            'remarks' => 'required|string|max:1000',
+        ]);
+
         $memo = Memo::onlyTrashed()->findOrFail($id);
         $memo->restore();
 
@@ -480,6 +490,7 @@ class MemoController extends Controller
             'memo_id' => $memo->id,
             'user_id' => auth()->id(),
             'action' => 'restored',
+            'remarks' => $request->remarks,
         ]);
 
         return response()->json(['success' => true]);
