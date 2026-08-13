@@ -35,66 +35,7 @@
 @endsection
 
 @push('styles')
-<style>
-    table.dataTable thead th {
-        font-weight: 600;
-        font-size: 0.8125rem;
-        text-align: center;
-        text-transform: uppercase;
-        letter-spacing: 0.03em;
-        color: #64748b;
-        padding: 1.1rem 1rem;
-        border-bottom: 2px solid #e2e8f0;
-    }
-    .dark table.dataTable thead th {
-        color: #cbd5e1;
-        border-bottom-color: #475569;
-    }
-    table.dataTable tbody td {
-        vertical-align: middle;
-        line-height: 1.35;
-        text-align: center;
-        padding: 0.9rem 1rem;
-        border-bottom: 1px solid #f1f5f9;
-        font-size: 0.9rem;
-    }
-    .dark table.dataTable tbody td {
-        color: #f1f5f9;
-        border-bottom-color: #334155;
-    }
-    table.dataTable tbody tr {
-        transition: .2s;
-    }
-    table.dataTable tbody tr:hover {
-        background: #fafafa;
-    }
-    .dark table.dataTable tbody tr:hover { background-color: #1e293b; }
-    table.dataTable tbody tr:last-child td { border-bottom: none; }
-
-    .dataTables_wrapper .dataTables_length,
-    .dataTables_wrapper .dataTables_filter,
-    .dataTables_wrapper .dataTables_info,
-    .dataTables_wrapper .dataTables_paginate {
-        margin-bottom: 1rem;
-        color: #64748b;
-        font-size: 0.875rem;
-    }
-    .dark .dataTables_wrapper .dataTables_length,
-    .dark .dataTables_wrapper .dataTables_filter,
-    .dark .dataTables_wrapper .dataTables_info,
-    .dark .dataTables_wrapper .dataTables_paginate {
-        color: #94a3b8;
-    }
-
-    .dataTables_filter input,
-    .dataTables_length select {
-        border: 1px solid #e2e8f0;
-        border-radius: 0.375rem;
-        padding: 0.375rem 0.75rem;
-        margin-left: 0.5rem;
-        background-color: white;
-    }
-</style>
+    @include('layouts.partials.datatable-styles')
 @endpush
 
 @push('scripts')

@@ -39,10 +39,11 @@
                             @error('username') <p class="text-red-600 text-sm">{{ $message }}</p> @enderror
                         </div>
                         <div>
-                            <label class="block font-medium mb-1 dark:text-white">
-                                Password {{ $editingUserId ? '(leave blank to keep current)' : '' }}
-                            </label>
+                            <label class="block font-medium mb-1 dark:text-white">Password</label>
                             <input type="password" wire:model="password" class="w-full border rounded p-2 dark:bg-slate-800 dark:border-slate-700 dark:text-white">
+                            @if($editingUserId)
+                                <p class="text-xs text-slate-400 mt-1">Leave blank to keep current password</p>
+                            @endif
                             @error('password') <p class="text-red-600 text-sm">{{ $message }}</p> @enderror
                         </div>
                     </div>

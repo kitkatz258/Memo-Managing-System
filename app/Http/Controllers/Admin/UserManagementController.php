@@ -25,14 +25,34 @@ class UserManagementController extends Controller
                     return "<span class='inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium {$color}'>" . ucfirst($user->role) . "</span>";
                 })
                 ->addColumn('company_name', function ($user) {
+                    if ($user->role === 'admin') {
+                        return "<span class='inline-flex items-center rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200 dark:bg-indigo-950/40 dark:text-indigo-400 dark:border-indigo-900/50 px-2.5 py-0.5 text-xs font-medium'>All Access</span>";
+                    }
                     $company = $user->companies->first();
-                    return $company ? e($company->code) : '<span class="text-slate-400 dark:text-slate-600">—</span>';
+                    if (!$company) {
+                        return '<span class="text-slate-400 dark:text-slate-600">—</span>';
+                    }
+                    return "<span class='inline-flex items-center rounded-full bg-slate-100 text-slate-800 border border-slate-200 dark:bg-slate-800 dark:text-slate-100 dark:border-slate-700 px-2.5 py-0.5 text-xs font-semibold'>" . e($company->code) . "</span>";
                 })
                 ->addColumn('department_name', function ($user) {
+                    if ($user->role === 'admin') {
+                        return "<span class='inline-flex items-center rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200 dark:bg-indigo-950/40 dark:text-indigo-400 dark:border-indigo-900/50 px-2.5 py-0.5 text-xs font-medium'>All Access</span>";
+                    }
                     $department = $user->departments->first();
-                    return $department ? e($department->name) : '<span class="text-slate-400 dark:text-slate-600">—</span>';
+                    if (!$department) {
+                        return '<span class="text-slate-400 dark:text-slate-600">—</span>';
+                    }
+                    return "<span class='inline-flex items-center rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200 dark:bg-indigo-950/40 dark:text-indigo-400 dark:border-indigo-900/50 px-2.5 py-0.5 text-xs font-medium'>" . e($department->name) . "</span>";
                 })
-                ->addColumn('rank_name', fn($user) => $user->employeeRank->name ?? '—')
+                ->addColumn('rank_name', function ($user) {
+                    if ($user->role === 'admin') {
+                        return "<span class='inline-flex items-center rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200 dark:bg-indigo-950/40 dark:text-indigo-400 dark:border-indigo-900/50 px-2.5 py-0.5 text-xs font-medium'>All Access</span>";
+                    }
+                    if (!$user->employeeRank) {
+                        return '<span class="text-slate-400 dark:text-slate-600">—</span>';
+                    }
+                    return "<span class='inline-flex items-center rounded-full bg-amber-50 text-amber-700 border border-amber-200 dark:bg-amber-950/40 dark:text-amber-400 dark:border-amber-900/50 px-2.5 py-0.5 text-xs font-medium'>" . e($user->employeeRank->name) . "</span>";
+                })
                 ->addColumn('actions', function ($user) {
                     return '
                         <div class="flex items-center justify-center gap-2">
@@ -49,7 +69,7 @@ class UserManagementController extends Controller
                         </div>
                     ';
                 })
-                ->rawColumns(['role_badge', 'company_name', 'department_name', 'actions'])
+                ->rawColumns(['role_badge', 'company_name', 'department_name', 'rank_name', 'actions'])
                 ->make(true);
         }
 
