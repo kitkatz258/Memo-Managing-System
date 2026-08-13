@@ -256,6 +256,10 @@
         openPdfViewer($(this).data('id'));
     });
 
+    $('#globalSearch').on('keyup', function () {
+        archivedTable.search(this.value).draw();
+    });
+
     $('#closePdfModal').on('click', function(){
         $('#pdfModal').removeClass('flex').addClass('hidden');
         $('#pdfFrame').attr('src', '');

@@ -386,6 +386,24 @@ class MemoController extends Controller
             $query = Memo::onlyTrashed()->with(['companies', 'departments', 'employeeRanks']);
             
             return DataTables::of($query)
+                ->filter(function ($query) use ($request) {
+                    $search = trim($request->input('search.value', ''));
+
+                    if ($search === '') {
+                        return;
+                    }
+
+                    $query->where(function ($q) use ($search) {
+                        $q->where('memo_no', 'LIKE', "%{$search}%")
+                        ->orWhere('title', 'LIKE', "%{$search}%")
+                        ->orWhere('author', 'LIKE', "%{$search}%")
+                        ->orWhere('year', 'LIKE', "%{$search}%")
+                        ->orWhereRaw(
+                            "MATCH(title, extracted_content) AGAINST(? IN NATURAL LANGUAGE MODE)",
+                            [$search]
+                        );
+                    });
+                })
                 ->addColumn('company_list', function ($memo) {
                     if ($memo->for_all_companies) {
                         return "
