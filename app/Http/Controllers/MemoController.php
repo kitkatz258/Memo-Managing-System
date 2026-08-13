@@ -2,11 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Category;
+use App\Models\Department;
 use App\Models\Company;
 use App\Models\EmployeeRank;
 use App\Models\Memo;
 use Dflydev\DotAccessData\Data;
+use App\Models\MemoLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Yajra\DataTables\Facades\DataTables;
@@ -66,7 +67,7 @@ class MemoController extends Controller
     public function index(Request $request)
     {
         if ($request->ajax()) {
-            $query = Memo::with(['companies', 'categories', 'employeeRanks', 'supersededMemos', 'relatedMemos']);
+            $query = Memo::with(['companies', 'departments', 'employeeRanks', 'supersededMemos', 'relatedMemos']);
 
             if ($companyId = $request->get('company_id')) {
                 $query->where(function ($q) use ($companyId) {
@@ -75,10 +76,10 @@ class MemoController extends Controller
                 });
             }
 
-            if($categoryId = $request->get('category_id')){
-                $query->where(function ($q) use ($categoryId){
-                    $q->where('for_all_categories', true)
-                      ->orWhereHas('categories', fn($q2) => $q2->where('categories.id', $categoryId));
+            if($departmentId = $request->get('department_id')){
+                $query->where(function ($q) use ($departmentId){
+                    $q->where('for_all_departments', true)
+                      ->orWhereHas('departments', fn($q2) => $q2->where('departments.id', $departmentId));
                 });
             }
 
@@ -129,21 +130,21 @@ class MemoController extends Controller
                         
                     return "<div class='flex flex-wrap gap-1.5 max-w-[200px]'>{$pills}</div>";
                 })
-                ->addColumn('category_list', function ($memo) {
-                    if ($memo->for_all_categories) {
+                ->addColumn('department_list', function ($memo) {
+                    if ($memo->for_all_departments) {
                         return "<span class='inline-flex items-center rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-400 dark:border-emerald-900/50 px-2.5 py-0.5 text-xs font-medium'>All</span>";
                     }
 
-                    $categories = $memo->categories->pluck('name');
-                    $total = $categories->count();
+                    $departments = $memo->departments->pluck('name');
+                    $total = $departments->count();
 
-                    $pills = $categories->take(2)->map(fn($name) => 
+                    $pills = $departments->take(2)->map(fn($name) => 
                         "<span class='inline-flex items-center rounded-full bg-slate-100 text-slate-800 border border-slate-200 dark:bg-slate-800 dark:text-slate-100 dark:border-slate-700 px-2.5 py-0.5 text-xs font-medium whitespace-nowrap'>" . e($name) . "</span>"
                     )->join('');
 
                     if ($total > 2) {
                         $remaining = $total - 2;
-                        $fullList = e($categories->join(', '));
+                        $fullList = e($departments->join(', '));
                         $pills .= "<span title='{$fullList}' class='cursor-pointer inline-flex items-center rounded-full bg-slate-200 text-slate-600 border border-slate-300 dark:bg-slate-900 dark:text-slate-400 dark:border-slate-800 px-2 py-0.5 text-xs font-medium'>+{$remaining}</span>";
                     }
 
@@ -185,6 +186,11 @@ class MemoController extends Controller
                                 class="flex items-center justify-center w-7 h-7 rounded-full bg-slate-100 border border-slate-200 text-slate-600 hover:bg-red-50 hover:text-red-600 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-400 dark:hover:bg-red-950/30 dark:hover:text-red-400 dark:hover:border-red-900/50 transition-all duration-150 shadow-sm" 
                                 title="Archive">
                             <i class="ri-archive-line text-base"></i>
+                        </button>
+                        <button onclick="openHistoryModal('.$memo->id.')"
+                                class="flex items-center justify-center w-7 h-7 rounded-full bg-slate-100 border border-slate-200 text-slate-600 hover:bg-indigo-50 hover:text-indigo-600 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-400 dark:hover:bg-indigo-950/30 dark:hover:text-indigo-400 transition-all duration-150 shadow-sm"
+                                title="History">
+                            <i class="ri-history-line text-base"></i>
                         </button>
                     </div>
                     ';
@@ -288,15 +294,15 @@ class MemoController extends Controller
                         </div>
                     ';
                 })
-                ->rawColumns(['memo_no_link', 'title_with_preview', 'company_list', 'rank_list', 'category_list', 'actions', 'related_list', 'superseded_list'])
+                ->rawColumns(['memo_no_link', 'title_with_preview', 'company_list', 'rank_list', 'department_list', 'actions', 'related_list', 'superseded_list'])
                 ->make(true);
         }
 
         $companies = Company::all();
-        $categories = Category::all();
+        $departments = Department::all();
         $employeeRanks = EmployeeRank::all();
         
-        return view('memos.index', compact('companies', 'categories', 'employeeRanks'));
+        return view('memos.index', compact('companies', 'departments', 'employeeRanks'));
     }
 
     public function details(Memo $memo)
@@ -304,7 +310,7 @@ class MemoController extends Controller
         $memo = Memo::withTrashed()
         ->with([
             'companies',
-            'categories',
+            'departments',
             'employeeRanks',
             'supersededMemos',
             'relatedMemos',
@@ -312,13 +318,13 @@ class MemoController extends Controller
         ])
         ->findOrFail($memo->id);
 
-        $memo->load(['companies', 'categories', 'supersededMemos', 'relatedMemos', 'supersededMemos']);
+        $memo->load(['companies', 'departments', 'supersededMemos', 'relatedMemos', 'supersededMemos']);
 
         return response()->json([
             'id' => $memo->id,
             'memo_no' => $memo->memo_no,
             'title' => $memo->title,
-            'category' => $memo->for_all_categories ? 'All' : ($memo->categories->pluck('name')->join(', ') ?: '—'),
+            'departments' => $memo->for_all_departments ? 'All' : ($memo->departments->pluck('name')->join(', ') ?: '—'),
             'company' => $memo->for_all_companies ? 'All' : ($memo->companies->pluck('name')->join(', ') ?: '—'),
             'author' => $memo->author ?: '—',
             'year' => $memo->year,
@@ -326,6 +332,12 @@ class MemoController extends Controller
             'related' => $memo->relatedMemos->map(fn($m) => ['id' => $m->id, 'memo_no' => $m->memo_no]),
             'superseded' => $memo->supersededMemos->map(fn($m) => ['id' => $m->id, 'memo_no' => $m->memo_no]),
             'superseded_by' => $memo->supersededByMemos->map(fn($m) => ['id' => $m->id, 'memo_no' => $m->memo_no])
+        ]);
+
+        MemoLog::create([
+            'memo_id' => $memo->id,
+            'user_id' => auth()->id(),
+            'action' => 'viewed',
         ]);
     }
 
@@ -344,16 +356,29 @@ class MemoController extends Controller
         return $query->select('id', 'title')->limit(20)->get();
     }
 
-    public function archive(Memo $memo)
+    public function archive(Request $request, $id)
     {
+        $request->validate([
+            'remarks' => 'required|string|max:1000',
+        ]);
+
+        $memo = Memo::findOrFail($id);
         $memo->delete();
+
+        MemoLog::create([
+            'memo_id' => $memo->id,
+            'user_id' => auth()->id(),
+            'action' => 'archived',
+            'remarks' => $request->remarks,
+        ]);
+
         return response()->json(['success' => true]);
     }
 
     public function archived(Request $request)
     {
         if($request->ajax()){
-            $query = Memo::onlyTrashed()->with(['companies', 'categories', 'employeeRanks']);
+            $query = Memo::onlyTrashed()->with(['companies', 'departments', 'employeeRanks']);
             
             return DataTables::of($query)
                 ->addColumn('company_list', function ($memo) {
@@ -375,21 +400,21 @@ class MemoController extends Controller
                             px-2.5 py-0.5 text-xs font-medium'>".$code."</span>"
                         )->join(' ');
                 })
-                ->addColumn('category_list', function ($memo) {
-                    if ($memo->for_all_categories) {
+                ->addColumn('department_list', function ($memo) {
+                    if ($memo->for_all_departments) {
                         return "<span class='inline-flex items-center rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-400 dark:border-emerald-900/50 px-2.5 py-0.5 text-xs font-medium'>All</span>";
                     }
 
-                    $categories = $memo->categories->pluck('name');
-                    $total = $categories->count();
+                    $departments = $memo->departments->pluck('name');
+                    $total = $departments->count();
 
-                    $pills = $categories->take(2)->map(fn($name) => 
+                    $pills = $departments->take(2)->map(fn($name) => 
                         "<span class='inline-flex items-center rounded-full bg-slate-100 text-slate-800 border border-slate-200 dark:bg-slate-800 dark:text-slate-100 dark:border-slate-700 px-2.5 py-0.5 text-xs font-medium whitespace-nowrap'>" . e($name) . "</span>"
                     )->join('');
 
                     if ($total > 2) {
                         $remaining = $total - 2;
-                        $fullList = e($categories->join(', '));
+                        $fullList = e($departments->join(', '));
                         $pills .= "<span title='{$fullList}' class='cursor-pointer inline-flex items-center rounded-full bg-slate-200 text-slate-600 border border-slate-300 dark:bg-slate-900 dark:text-slate-400 dark:border-slate-800 px-2 py-0.5 text-xs font-medium'>+{$remaining}</span>";
                     }
 
@@ -427,7 +452,7 @@ class MemoController extends Controller
                         '.$memo->memo_no.'
                     </button>';
                 })
-                ->rawColumns(['memo_no_link', 'company_list', 'category_list', 'actions'])
+                ->rawColumns(['memo_no_link', 'company_list', 'department_list', 'actions'])
                 ->make(true);
         };
 
@@ -450,7 +475,37 @@ class MemoController extends Controller
     {
         $memo = Memo::onlyTrashed()->findOrFail($id);
         $memo->restore();
+
+        MemoLog::create([
+            'memo_id' => $memo->id,
+            'user_id' => auth()->id(),
+            'action' => 'restored',
+        ]);
+
         return response()->json(['success' => true]);
+    }
+
+    public function logs(Request $request, $id)
+    {
+        $query = MemoLog::with('user')->where('memo_id', $id)->latest();
+
+        return DataTables::of($query)
+            ->addColumn('user_name', fn($log) => $log->user->name ?? 'Deleted User')
+            ->addColumn('action_badge', function($log){
+                $colors = [
+                    'uploaded' => 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/40 dark:text-blue-400 dark:border-blue-900/50',
+                    'edited' => 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/40 dark:text-amber-400 dark:border-amber-900/50',
+                    'archived' => 'bg-red-50 text-red-700 border-red-200 dark:bg-red-950/40 dark:text-red-400 dark:border-red-900/50',
+                    'restored' => 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-400 dark:border-emerald-900/50',
+                    'viewed' => 'bg-slate-100 text-slate-700 border-slate-200 dark:bg-slate-800 dark:text-slate-100 dark:border-slate-700',
+                ];
+                $color = $colors[$log->action] ?? $colors['viewed'];
+                return "<span class='inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium {$color}'>" . ucfirst($log->action) . "</span>";
+            })
+            ->addColumn('remarks_display', fn($log) => $log->remarks ? e($log->remarks) : '<span class="text-slate-400 dark:text-slate-600">—</span>')
+            ->editColumn('created_at', fn($log) => $log->created_at->format('M d, Y h:i A'))
+            ->rawColumns(['action_badge', 'remarks_display'])
+            ->make(true);
     }
 
     public function show(Memo $memo)

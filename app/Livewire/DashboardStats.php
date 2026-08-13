@@ -7,6 +7,15 @@ use Livewire\Component;
 
 class DashboardStats extends Component
 {
+    protected $listeners = [
+        'memo-saved' => 'refreshStats',
+    ];
+
+    public function refreshStats()
+    {
+        
+    }
+
     public function render()
     {
         $totalMemos = Memo::count();
@@ -22,10 +31,12 @@ class DashboardStats extends Component
         $labels = [];
         $data = [];
 
-        for($month = 1; $month <= 12; $month++) {
+        for ($month = 1; $month <= 12; $month++) {
             $labels[] = now()->setMonth($month)->format('M');
             $data[] = $uploads[$month] ?? 0;
         }
+
+        $this->dispatch('chart-data-updated', labels: $labels, data: $data);
 
         return view('livewire.dashboard-stats', compact(
             'totalMemos',

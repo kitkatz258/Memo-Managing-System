@@ -3,33 +3,6 @@
         <h2 class="text-lg font-semibold dark:text-white">
             Dashboard
         </h2>
-
-        <button
-            wire:click="$refresh"
-            wire:loading.attr="disabled"
-            class="inline-flex items-center gap-2 px-4 py-2
-                   bg-white dark:bg-slate-900
-                   border border-slate-200 dark:border-slate-700
-                   rounded-md shadow-sm
-                   text-sm font-medium
-                   text-slate-700 dark:text-slate-200
-                   hover:bg-slate-50 dark:hover:bg-slate-800
-                   transition"
-        >
-            <i
-                class="ri-refresh-line"
-                wire:loading.class="animate-spin"
-                wire:target="$refresh"
-            ></i>
-
-            <span wire:loading.remove wire:target="$refresh">
-                Refresh Dashboard
-            </span>
-
-            <span wire:loading wire:target="$refresh">
-                Refreshing...
-            </span>
-        </button>
     </div>
 
     <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -104,63 +77,47 @@
         <canvas id="uploadsChart" height="100"></canvas>
     </div>
 
-
     <script>
         document.addEventListener('livewire:init', () => {
 
-            function initializeUploadsChart() {
-
+            function buildChart(labels, values) {
                 const canvas = document.getElementById('uploadsChart');
+                if (!canvas) return;
 
-                if (!canvas) {
+                if (typeof Chart === 'undefined') {
+                    console.error('Chart.js has not loaded yet.');
                     return;
                 }
 
-                if (window.uploadsChart) {
+                if (window.uploadsChart instanceof Chart) {
                     window.uploadsChart.destroy();
                 }
+                window.uploadsChart = null;
 
                 window.uploadsChart = new Chart(canvas, {
                     type: 'line',
-
                     data: {
-                        labels: @json($labels),
-
+                        labels: labels,
                         datasets: [{
                             label: 'Uploads',
-                            data: @json($data),
+                            data: values,
                             borderWidth: 5
                         }]
                     },
-
                     options: {
                         responsive: true,
-
-                        plugins: {
-                            legend: {
-                                display: false
-                            }
-                        },
-
+                        plugins: { legend: { display: false } },
                         scales: {
-                            y: {
-                                beginAtZero: true,
-
-                                ticks: {
-                                    precision: 0
-                                }
-                            }
+                            y: { beginAtZero: true, ticks: { precision: 0 } }
                         }
                     }
                 });
             }
 
+            buildChart(@json($labels), @json($data));
 
-            initializeUploadsChart();
-
-
-            Livewire.hook('morph.updated', () => {
-                initializeUploadsChart();
+            Livewire.on('chart-data-updated', (event) => {
+                buildChart(event.labels, event.data);
             });
 
         });

@@ -117,7 +117,7 @@
                 { data: 'memo_no_link', name: 'memo_no', className: 'text-center'},
                 { data: 'title', name: 'title' },
                 { data: 'company_list', name: 'company_list', orderable: false, searchable: false },
-                { data: 'category_list', name: 'category_list', orderable: false, searchable: false },
+                { data: 'department_list', name: 'department_list', orderable: false, searchable: false },
                 { data: 'deleted_at_formatted', name: 'deleted_at', className: 'text-center' },
                 { data: 'actions', orderable: false, searchable: false, className: 'text-center' }
             ]
@@ -254,12 +254,6 @@
     $('#closePdfModal').on('click', function(){
         $('#pdfModal').removeClass('flex').addClass('hidden');
         $('#pdfFrame').attr('src', '');
-    });
-
-    $('#pdfModal').on('click', function(e){
-        if(e.target === this){
-            $('#closePdfModal').click();
-        }
     });
 });
 </script>

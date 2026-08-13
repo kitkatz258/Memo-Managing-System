@@ -16,6 +16,7 @@
     <link href="{{ asset('vendor/techwind/libs/remixicon/fonts/remixicon.css') }}" rel="stylesheet" type="text/css">
     
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     @stack('styles')
 </head>
 
@@ -32,7 +33,6 @@
         </main>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <script src="{{ asset('vendor/techwind/libs/gumshoejs/gumshoe.polyfills.min.js') }}"></script>
     <script src="{{ asset('vendor/techwind/libs/shufflejs/shuffle.min.js') }}"></script>

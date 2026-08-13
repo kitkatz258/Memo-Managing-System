@@ -13,10 +13,10 @@
         </select>
 
         <label class="font-medium">Department:</label>
-        <select id="categoryFilter" class="border rounded-md p-2 dark:bg-slate-800 dark:border-slate-700 dark:text-white">
+        <select id="departmentFilter" class="border rounded-md p-2 dark:bg-slate-800 dark:border-slate-700 dark:text-white">
             <option value="">All</option>
-            @foreach($categories as $category)
-                <option value="{{ $category->id }}">{{ $category->name }}</option>
+            @foreach($departments as $department)
+                <option value="{{ $department->id }}">{{ $department->name }}</option>
             @endforeach
         </select>
 
@@ -56,7 +56,7 @@
                 <div>
                     <p class="text-sm text-slate-400">Memo No. <span id="pdfMemoNo" class="font-semibold text-slate-700 dark:text-slate-200"></span></p>
                     <h3 id="pdfTitle" class="font-bold text-lg dark:text-white mt-1"></h3>
-                    <p id="pdfCategory" class="text-sm text-slate-400"></p>
+                    <p id="pdfDepartment" class="text-sm text-slate-400"></p>
                 </div>
                 <button id="closePdfModal" class="text-slate-400 hover:text-slate-700 text-xl">&times;</button>
             </div>
@@ -120,6 +120,28 @@
         </div>
     </div>
 
+    {{-- History Modal --}}
+    <div id="historyModal" class="hidden fixed inset-0 z-[1000] items-center justify-center bg-black/50">
+        <div class="bg-white dark:bg-slate-900 rounded-md shadow-lg w-full max-w-[750px] max-h-[85vh] overflow-y-auto border border-gray-100 dark:border-slate-700 p-6 m-4">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-bold dark:text-white">Memo History</h3>
+                <button onclick="closeHistoryModal()" class="text-slate-400 hover:text-slate-700 dark:hover:text-white transition text-xl">&times;</button>
+            </div>
+            <div class="overflow-x-auto">
+                <table id="historyTable" class="w-full border-collapse">
+                    <thead>
+                        <tr>
+                            <th>Action</th>
+                            <th>By</th>
+                            <th>Remarks</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+                </table>
+            </div>
+        </div>
+    </div>
+
     <livewire:modals.memo-form-modal />
 @endsection
 
@@ -140,7 +162,7 @@
             url: "{{ route('memos.index') }}",
             data: function (d) {
                 d.company_id = $('#companyFilter').val();
-                d.category_id = $('#categoryFilter').val();
+                d.department_id = $('#departmentFilter').val();
                 d.rank_id = $('#rankFilter').val();
             }
         },
@@ -149,7 +171,7 @@
             { data: 'title_with_preview', name: 'title', className: 'align-middle' },
             { data: 'company_list', name: 'company_list', orderable: false, searchable: false },
             { data: 'author', name: 'author' },
-            { data: 'category_list', name: 'category_list', orderable: false, searchable: false },
+            { data: 'department_list', name: 'department_list', orderable: false, searchable: false },
             { data: 'rank_list', name: 'rank_list', orderable: false, searchable: false },
             { data: 'superseded_list', name: 'superseded_list', orderable: false, searchable: false },
             { data: 'related_list', name: 'related_list', orderable: false, searchable: false },
@@ -165,7 +187,7 @@
         }, 300);
     });
 
-    $('#companyFilter, #categoryFilter, #rankFilter').on('change', function () {
+    $('#companyFilter, #departmentFilter, #rankFilter').on('change', function () {
         table.ajax.reload();
     });
 
@@ -177,24 +199,44 @@
 
     function archiveMemo(id) {
         Swal.fire({
-            title: 'Archive this memo?',
-            text: 'It will be moved to Archives and hidden from users.',
             icon: 'warning',
+            title: 'Archive this memo?',
+            input: 'textarea',
+            inputLabel: 'Reason for archiving (required)',
+            inputPlaceholder: 'Type your reason here...',
+            inputValidator: (value) => {
+                if (!value || !value.trim()) {
+                    return 'A remark is required to archive this memo.';
+                }
+            },
             showCancelButton: true,
             confirmButtonText: 'Archive',
+            confirmButtonColor: '#dc2626',
         }).then((result) => {
-            if (result.isConfirmed) {
-                fetch(`/memos/${id}`, {
-                    method: 'DELETE',
-                    headers: {
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                        'Accept': 'application/json',
+            if (!result.isConfirmed) return;
+
+            fetch(`/memos/${id}/archive`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                },
+                body: JSON.stringify({ remarks: result.value }),
+            }).then(async (res) => {
+                    const text = await res.text();
+                    let body = {};
+                    try { body = JSON.parse(text); } catch (e) {
+                        console.error('Non-JSON response:', text);
                     }
-                }).then(res => res.json()).then(() => {
+                    if (!res.ok) {
+                        Swal.fire('Error', body.message || 'Something went wrong.', 'error');
+                        return;
+                    }
                     table.ajax.reload(null, false);
-                    Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'Memo archived', showConfirmButton: false, timer: 2000 });
-                });
-            }
+                    Swal.fire({ icon: 'success', title: 'Archived', timer: 1200, showConfirmButton: false });
+                })
+                .catch(() => Swal.fire('Error', 'Something went wrong.', 'error'));
         });
     }
 
@@ -227,7 +269,7 @@
             .then(data => {
                 $('#pdfTitle').text(data.title);
                 $('#pdfMemoNo').text(data.memo_no);
-                $('#pdfCategory').text(data.category);
+                $('#pdfDepartment').text(data.department);
                 $('#pdfCompany').text(data.company);
                 $('#pdfUploaded').text(data.uploaded);
                 $('#pdfAuthor').text(data.author);
@@ -278,12 +320,36 @@
         $('#pdfModal').removeClass('flex').addClass('hidden');
         $('#pdfFrame').attr('src', '');
     });
+    
+    
+    let historyTable = null;
 
-    $('#pdfModal').on('click', function(e){
-        if(e.target === this){
-            $('#closePdfModal').click();
+    function openHistoryModal(memoId) {
+        document.getElementById('historyModal').classList.remove('hidden');
+        document.getElementById('historyModal').classList.add('flex');
+
+        if (historyTable) {
+            historyTable.ajax.url(`/memos/${memoId}/logs`).load();
+            return;
         }
-    });
+
+        historyTable = $('#historyTable').DataTable({
+            processing: true,
+            serverSide: true,
+            ajax: { url: `/memos/${memoId}/logs` },
+            columns: [
+                { data: 'action_badge', name: 'action_badge', orderable: false, searchable: false },
+                { data: 'user_name', name: 'user_name', orderable: false, searchable: false },
+                { data: 'remarks_display', name: 'remarks_display', orderable: false, searchable: false },
+                { data: 'created_at', name: 'created_at', orderable: false, searchable: false },
+            ],
+        });
+    }
+
+    function closeHistoryModal() {
+        document.getElementById('historyModal').classList.add('hidden');
+        document.getElementById('historyModal').classList.remove('flex');
+    }
 </script>
 @endpush
 

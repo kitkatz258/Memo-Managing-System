@@ -4,8 +4,9 @@ namespace App\Livewire\Modals;
 
 use App\Models\Memo;
 use App\Models\Company;
-use App\Models\Category;
+use App\Models\Department;
 use App\Models\EmployeeRank;
+use App\Models\MemoLog;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
@@ -31,15 +32,15 @@ class MemoFormModal extends Component
 
     public array $selectedCompanies = [];
     public bool $forAllCompanies = false;
-    public array $selectedCategories = [];
-    public bool $forAllCategories = false;
+    public array $selectedDepartments = [];
+    public bool $forAllDepartments = false;
     public array $selectedRanks =[];
     public bool $forAllRanks = false;
     public array $selectedSupersededMemos = [];
     public array $selectedRelatedMemos = [];
 
     public $companies = [];
-    public $categories = [];
+    public $departments = [];
     public $employeeRanks = [];
     public $existingMemos = [];
 
@@ -57,7 +58,7 @@ class MemoFormModal extends Component
             'author' => 'required|string|max:255',
             'file' => ($this->editingMemoId ? 'nullable' : 'required') . '|file|mimes:pdf|max:40960',
             'selectedCompanies' => $this->forAllCompanies ? 'nullable|array' : 'required|array|min:1',
-            'selectedCategories' => $this->forAllCategories ? 'nullable|array' : 'required|array|min:1',
+            'selectedDepartments' => $this->forAllDepartments ? 'nullable|array' : 'required|array|min:1',
             'selectedRanks' => $this->forAllRanks ? 'nullable|array' : 'required|array|min:1',
         ];
     }
@@ -65,7 +66,7 @@ class MemoFormModal extends Component
     public function mount()
     {
         $this->companies = Company::all();
-        $this->categories = Category::all();
+        $this->departments = Department::all();
         $this->employeeRanks = EmployeeRank::all();
         $this->year = now()->year;
     }
@@ -83,7 +84,7 @@ class MemoFormModal extends Component
     {
         $this->resetForm();
 
-        $memo = Memo::with(['companies', 'categories', 'employeeRanks', 'supersededMemos', 'relatedMemos'])->findOrFail($memoId);
+        $memo = Memo::with(['companies', 'departments', 'employeeRanks', 'supersededMemos', 'relatedMemos'])->findOrFail($memoId);
 
         $this->editingMemoId = $memo->id;
         $this->title = $memo->title;
@@ -96,15 +97,15 @@ class MemoFormModal extends Component
         $this->selectedCompanies = $memo->companies->pluck('id')->map(fn($id) => (string) $id)->toArray();
         $this->dispatch('set-company-values', ids: $this->selectedCompanies);
 
-        $this->forAllCategories = $memo->for_all_categories;
+        $this->forAllDepartments = $memo->for_all_departments;
 
-        $this->selectedCategories = $memo->for_all_categories
+        $this->selectedDepartments = $memo->for_all_departments
             ? []
-            : $memo->categories
+            : $memo->departments
                 ->pluck('id')
                 ->map(fn ($id) => (string) $id)
                 ->toArray();
-        $this->dispatch('set-category-values', ids: $this->selectedCategories);
+        $this->dispatch('set-department-values', ids: $this->selectedDepartments);
 
         $this->forAllRanks = $memo->for_all_ranks;
         $this->selectedRanks = $memo->employeeRanks->pluck('id')->map(fn($id) => (string) $id)->toArray();
@@ -128,10 +129,10 @@ class MemoFormModal extends Component
             $this->selectedCompanies = [];
     }
 
-    public function updatedForAllCategories($value)
+    public function updatedForAllDepartments($value)
     {
         if($value)
-            $this->selectedCategories = [];
+            $this->selectedDepartments = [];
     }
 
     public function updatedForAllRanks($value)
@@ -150,7 +151,7 @@ class MemoFormModal extends Component
             'year' => $this->year,
             'author' => $this->author,
             'for_all_companies' => $this->forAllCompanies,
-            'for_all_categories' => $this->forAllCategories,
+            'for_all_departments' => $this->forAllDepartments,
             'for_all_ranks' => $this->forAllRanks,
         ];
 
@@ -173,7 +174,9 @@ class MemoFormModal extends Component
             $data['extracted_content'] = $extractedContent;
         }
 
-        if($this->editingMemoId) {
+        $isEditing = (bool) $this->editingMemoId;
+
+        if($isEditing){
             $memo = Memo::findOrFail($this->editingMemoId);
             $memo->update($data);
         } else {
@@ -181,8 +184,14 @@ class MemoFormModal extends Component
             $memo = Memo::create($data);
         }
 
+        MemoLog::create([
+            'memo_id' => $memo->id,
+            'user_id' => auth()->id(),
+            'action' => $isEditing ? 'edited' : 'uploaded',
+        ]);
+
         $memo->companies()->sync($this->forAllCompanies ? [] : $this->selectedCompanies);
-        $memo->categories()->sync($this->selectedCategories);
+        $memo->departments()->sync($this->selectedDepartments);
         $memo->employeeRanks()->sync($this->forAllRanks ? [] : $this->selectedRanks);
         $memo->supersededMemos()->sync($this->selectedSupersededMemos);
 
@@ -208,7 +217,7 @@ class MemoFormModal extends Component
     {
         $this->reset([
             'editingMemoId', 'title', 'memoNo', 'author', 'file', 'existingFileName',
-            'selectedCompanies', 'forAllCompanies', 'selectedCategories', 'forAllCategories',
+            'selectedCompanies', 'forAllCompanies', 'selectedDepartments', 'forAllDepartments',
             'selectedRanks', 'forAllRanks', 'selectedSupersededMemos', 'selectedRelatedMemos',
         ]);
         $this->year = now()->year;

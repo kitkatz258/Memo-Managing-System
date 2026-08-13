@@ -22,6 +22,7 @@ class User extends Authenticatable
         'username',
         'password',
         'role',
+        'employee_rank_id',
     ];
 
     /**
@@ -43,4 +44,24 @@ class User extends Authenticatable
         'username_verified_at' => 'datetime',
         'password' => 'hashed',
     ];
+
+    public function companies()
+    {
+        return $this->belongsToMany(Company::class, 'company_user');
+    }
+
+    public function employeeRank()
+    {
+        return $this->belongsTo(EmployeeRank::class);
+    }
+
+    public function departments()
+    {
+        return $this->belongsToMany(Department::class, 'department_user');
+    }
+
+    public function isAdmin(): bool
+    {
+        return $this->role === 'admin';
+    }
 }

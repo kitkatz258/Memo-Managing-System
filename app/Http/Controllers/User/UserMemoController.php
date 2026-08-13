@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
-use App\Models\Category;
+use App\Models\Department;
 use App\Models\Company;
 use App\Models\EmployeeRank;
 use App\Models\Memo;
@@ -15,7 +15,7 @@ class UserMemoController extends Controller
     public function index(Request $request)
     {
         if ($request->ajax()) {
-            $query = Memo::with(['companies', 'categories', 'supersededMemos', 'relatedMemos']);
+            $query = Memo::with(['companies', 'departments', 'supersededMemos', 'relatedMemos']);
 
             if ($companyId = $request->get('company_id')) {
                 $query->where(function ($q) use ($companyId) {
@@ -24,10 +24,10 @@ class UserMemoController extends Controller
                 });
             }
 
-            if($categoryId = $request->get('category_id')){
-                $query->where(function ($q) use ($categoryId){
-                    $q->where('for_all_categories', true)
-                      ->orWhereHas('categories', fn($q2) => $q2->where('categories.id', $categoryId));
+            if($departmentId = $request->get('department_id')){
+                $query->where(function ($q) use ($departmentId){
+                    $q->where('for_all_departments', true)
+                      ->orWhereHas('departments', fn($q2) => $q2->where('departments.id', $departmentId));
                 });
             }
 
@@ -60,21 +60,21 @@ class UserMemoController extends Controller
                         ->join('');
                     return "<div class='flex flex-wrap gap-1.5 max-w-[160px]'>{$pills}</div>";
                 })
-                ->addColumn('category_list', function ($memo) {
-                    if ($memo->for_all_categories) {
+                ->addColumn('department_list', function ($memo) {
+                    if ($memo->for_all_departments) {
                         return "<span class='inline-flex items-center rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-400 dark:border-emerald-900/50 px-2.5 py-0.5 text-xs font-medium'>All</span>";
                     }
 
-                    $categories = $memo->categories->pluck('name');
-                    $total = $categories->count();
+                    $departments = $memo->departments->pluck('name');
+                    $total = $departments->count();
 
-                    $pills = $categories->take(2)->map(fn($name) => 
+                    $pills = $departments->take(2)->map(fn($name) => 
                         "<span class='inline-flex items-center rounded-full bg-slate-100 text-slate-800 border border-slate-200 dark:bg-slate-800 dark:text-slate-100 dark:border-slate-700 px-2.5 py-0.5 text-xs font-medium whitespace-nowrap'>" . e($name) . "</span>"
                     )->join('');
 
                     if ($total > 2) {
                         $remaining = $total - 2;
-                        $fullList = e($categories->join(', '));
+                        $fullList = e($departments->join(', '));
                         $pills .= "<span title='{$fullList}' class='cursor-pointer inline-flex items-center rounded-full bg-slate-200 text-slate-600 border border-slate-300 dark:bg-slate-900 dark:text-slate-400 dark:border-slate-800 px-2 py-0.5 text-xs font-medium'>+{$remaining}</span>";
                     }
 
@@ -190,14 +190,14 @@ class UserMemoController extends Controller
                         </div>
                     ';
                 })
-                ->rawColumns(['memo_no_link', 'title_with_preview', 'company_list', 'rank_list', 'category_list', 'actions', 'related_list', 'superseded_list'])
+                ->rawColumns(['memo_no_link', 'title_with_preview', 'company_list', 'rank_list', 'department_list', 'actions', 'related_list', 'superseded_list'])
                 ->make(true);
         }
 
         $companies = Company::all();
-        $categories = Category::all();
+        $departments = Department::all();
         $employeeRanks = EmployeeRank::all();
         
-        return view('user.memos.index', compact('companies', 'categories', 'employeeRanks'));
+        return view('user.memos.index', compact('companies', 'departments', 'employeeRanks'));
     }
 }

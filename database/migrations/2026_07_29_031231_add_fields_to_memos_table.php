@@ -15,7 +15,7 @@ return new class extends Migration
             $table->string('memo_no')->nullable();
             $table->unsignedSmallInteger('year');
             $table->string('author')->nullable();
-            $table->boolean('for_all_categories')->default(false);
+            $table->boolean('for_all_departments')->default(false);
             $table->boolean('for_all_ranks')->default(false);
         });
     }
@@ -26,7 +26,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('memos', function (Blueprint $table) {
-            $table->dropColumn(['memo_no', 'year', 'author', 'for_all_categories', 'for_all_ranks']);
+            $table->dropColumn(['memo_no', 'year', 'author', 'for_all_departments', 'for_all_ranks']);
         });
     }
 };

@@ -33,6 +33,13 @@
                         Archives
                     </a>
                 </li>
+                
+                <li class="{{ request()->routeIs('admin.users.index') ? 'active' : '' }}">
+                    <a href="{{ route('admin.users.index') }}">
+                        <i class="ri-user-settings-line font-normal me-2"></i>
+                        User Management
+                    </a>
+                </li>
             @endif
         </ul>
     </div>

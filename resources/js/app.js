@@ -7,14 +7,14 @@ import 'tom-select/dist/css/tom-select.default.css';
 window.TomSelect = TomSelect;
 window.Swal = Swal;
 
-window.toggleAllCategories = function(checked) {
-    if(!window.categoryTomSelect) return;
+window.toggleAllDepartments = function(checked) {
+    if(!window.departmentTomSelect) return;
     if(checked) {
-        window.categoryTomSelect.setValue(
-            Object.keys(window.categoryTomSelect.options)
+        window.departmentTomSelect.setValue(
+            Object.keys(window.departmentTomSelect.options)
         );
     } else {
-        window.categoryTomSelect.clear();
+        window.departmentTomSelect.clear();
     }
 };
 

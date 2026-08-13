@@ -131,33 +131,33 @@
                                 @error('selectedCompanies') <p class="text-red-600 text-sm">{{ $message }}</p> @enderror
                             </div>
 
-                            {{-- Categories --}}
+                            {{-- Departments --}}
                             <div>
                                 <label class="inline-flex items-center mb-1">
-                                    <input type="checkbox" id="allCategoriesCheckbox" onchange="toggleAllCategories(this.checked)">
+                                    <input type="checkbox" id="allDepartmentsCheckbox" onchange="toggleAllDepartments(this.checked)">
                                     <span class="ml-2 font-medium dark:text-white">All Departments</span>
                                 </label>
 
                                 <div wire:ignore x-data x-init="
-                                    window.categoryTomSelect = new TomSelect($refs.categorySelect, {
+                                    window.departmentTomSelect = new TomSelect($refs.departmentSelect, {
                                         plugins: ['remove_button'],
                                         onChange: function(values) {
-                                            $wire.set('selectedCategories', values);
-                                            document.getElementById('allCategoriesCheckbox').checked = (values.length === {{ $categories->count() }});
+                                            $wire.set('selectedDepartments', values);
+                                            document.getElementById('allDepartmentsCheckbox').checked = (values.length === {{ $departments->count() }});
                                         }
                                     });
-                                    Livewire.on('set-category-values', (event) => {
-                                        categoryTomSelect.clear(true);
-                                        event.ids.forEach(id => categoryTomSelect.addItem(id, true));
+                                    Livewire.on('set-department-values', (event) => {
+                                        departmentTomSelect.clear(true);
+                                        event.ids.forEach(id => departmentTomSelect.addItem(id, true));
                                     });
                                 ">
-                                    <select multiple x-ref="categorySelect">
-                                        @foreach($categories as $category)
-                                            <option value="{{ $category->id }}">{{ $category->name }}</option>
+                                    <select multiple x-ref="departmentSelect">
+                                        @foreach($departments as $department)
+                                            <option value="{{ $department->id }}">{{ $department->name }}</option>
                                         @endforeach
                                     </select>
                                 </div>
-                                @error('selectedCategories') <p class="text-red-600 text-sm">{{ $message }}</p> @enderror
+                                @error('selectedDepartments') <p class="text-red-600 text-sm">{{ $message }}</p> @enderror
                             </div>
 
                             {{-- Employee Ranks --}}

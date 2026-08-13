@@ -13,10 +13,10 @@
         </select>
 
         <label class="font-medium">Department:</label>
-        <select id="categoryFilter" class="border rounded-md p-2 dark:bg-slate-800 dark:border-slate-700 dark:text-white">
+        <select id="departmentFilter" class="border rounded-md p-2 dark:bg-slate-800 dark:border-slate-700 dark:text-white">
             <option value="">All</option>
-            @foreach($categories as $category)
-                <option value="{{ $category->id }}">{{ $category->name }}</option>
+            @foreach($departments as $department)
+                <option value="{{ $department->id }}">{{ $department->name }}</option>
             @endforeach
         </select>
     </div>
@@ -44,7 +44,7 @@
                 <div>
                     <p class="text-sm text-slate-400">Memo No. <span id="pdfMemoNo" class="font-semibold text-slate-700 dark:text-slate-200"></span></p>
                     <h3 id="pdfTitle" class="font-bold text-lg dark:text-white mt-1"></h3>
-                    <p id="pdfCategory" class="text-sm text-slate-400"></p>
+                    <p id="pdfDepartment" class="text-sm text-slate-400"></p>
                 </div>
                 <button id="closePdfModal" class="text-slate-400 hover:text-slate-700 text-xl">&times;</button>
             </div>
@@ -120,7 +120,7 @@
             url: "{{ route('user.memos.index') }}",
             data: function (d) {
                 d.company_id = $('#companyFilter').val();
-                d.category_id = $('#categoryFilter').val();
+                d.department_id = $('#departmentFilter').val();
                 d.rank_id = $('#rankFilter').val();
             }
         },
@@ -129,7 +129,7 @@
             { data: 'title_with_preview', name: 'title' },
             { data: 'company_list', name: 'company_list', orderable: false, searchable: false },
             { data: 'author', name: 'author' },
-            { data: 'category_list', name: 'category_list', orderable: false, searchable: false },
+            { data: 'department_list', name: 'department_list', orderable: false, searchable: false },
             { data: 'superseded_list', name: 'superseded_list', orderable: false, searchable: false },
             { data: 'related_list', name: 'related_list', orderable: false, searchable: false },
         ],
@@ -143,7 +143,7 @@
         }, 300);
     });
 
-    $('#companyFilter, #categoryFilter, #rankFilter').on('change', function () {
+    $('#companyFilter, #departmentFilter, #rankFilter').on('change', function () {
         table.ajax.reload();
     });
 
@@ -182,7 +182,7 @@
             .then(data => {
                 $('#pdfTitle').text(data.title);
                 $('#pdfMemoNo').text(data.memo_no);
-                $('#pdfCategory').text(data.category);
+                $('#pdfDepartment').text(data.department);
                 $('#pdfCompany').text(data.company);
                 $('#pdfUploaded').text(data.uploaded);
                 $('#pdfAuthor').text(data.author);
@@ -219,11 +219,6 @@
         $('#pdfFrame').attr('src', '');
     });
 
-    $('#pdfModal').on('click', function(e){
-        if(e.target === this){
-            $('#closePdfModal').click();
-        }
-    });
 </script>
 @endpush
 
