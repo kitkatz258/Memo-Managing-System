@@ -15,6 +15,19 @@
         cursor: pointer;
     }
 
+    table.dataTable td.actions-col,
+    table.dataTable th.actions-col {
+        position: sticky;
+        right: 0;
+        background: white;
+        box-shadow: -6px 0 6px -6px rgba(0,0,0,0.15);
+        z-index: 1;
+    }
+    .dark table.dataTable td.actions-col,
+    .dark table.dataTable th.actions-col {
+        background: #0f172a;
+    }
+
     table.dataTable thead th {
         font-weight: 600;
         font-size: 0.8125rem;

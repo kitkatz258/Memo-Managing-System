@@ -42,6 +42,7 @@ class MemoController extends Controller
             $parser = new Parser();
             $pdf = $parser->parseFile($file->getRealPath());
             $extractedContent = $pdf->getText();
+            $extractedContent = $this->cleanExtractedText($extractedContent);
         } catch (\Exception $e) {
 
         }
@@ -517,6 +518,17 @@ class MemoController extends Controller
             ->editColumn('created_at', fn($log) => $log->created_at->format('M d, Y h:i A'))
             ->rawColumns(['action_badge', 'remarks_display'])
             ->make(true);
+    }
+
+    private function cleanExtractedText(string $text): string
+    {
+        $text = preg_replace_callback(
+            '/\b(?:[A-Za-z]\s){2,}[A-Za-z]\b/u',
+            fn ($m) => str_replace(' ', '', $m[0]),
+            $text
+        );
+
+        return $text;
     }
 
     public function show(Memo $memo)
