@@ -112,14 +112,14 @@ class MemoFormModal extends Component
         $this->dispatch('set-rank-values', ids: $this->selectedRanks);
 
         $this->selectedSupersededMemos = $memo->supersededMemos->pluck('id')->map(fn($id) => (string) $id)->toArray();
-        $this->dispatch('set-superseded-values', items: $memo->supersededMemos->map(fn($m) => ['id' => $m->id, 'title' => $m->title])->toArray());
+        $this->dispatch('set-superseded-values', items: $memo->supersededMemos->map(fn($m) => ['id' => $m->id, 'memo_no' => $m->memo_no, 'title' => $m->title])->toArray());
 
         $this->selectedRelatedMemos = DB::table('memo_relations')
             ->where('memo_id', $memo->id)
             ->pluck('related_memo_id')
             ->toArray();
-        $this->dispatch('set-related-values', items: $memo->relatedMemos->map(fn($m) => ['id' => $m->id, 'title' => $m->title])->toArray());
-
+        $this->dispatch('set-related-values', items: $memo->relatedMemos->map(fn($m) => ['id' => $m->id, 'memo_no' => $m->memo_no, 'title' => $m->title])->toArray());
+        
         $this->showModal = true;
     }
 

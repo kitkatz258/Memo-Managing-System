@@ -247,10 +247,6 @@
         openPdfViewer($(this).data('id'));
     });
 
-    $(document).on('click', '.memo-pill', function () {
-        openPdfViewer($(this).data('id'));
-    });
-
     $(document).on('click', '.open-related-memo', function(e){
         e.preventDefault();
         openPdfViewer($(this).data('id'));

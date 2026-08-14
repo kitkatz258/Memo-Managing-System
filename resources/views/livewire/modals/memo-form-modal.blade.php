@@ -62,10 +62,18 @@
                                     window.supersededTomSelect = new TomSelect($refs.supersededSelect, {
                                         plugins: ['remove_button'],
                                         valueField: 'id',
-                                        labelField: 'title',
-                                        searchField: 'title',
+                                        labelField: 'memo_no',
+                                        searchField: 'memo_no',
                                         create: false,
-                                        placeholder: 'Search memos to mark as superseded...',
+                                        placeholder: 'Search by memo no. to mark as superseded...',
+                                        render: {
+                                            option: function(item, escape) {
+                                                return '<div><strong>' + escape(item.memo_no) + '</strong> — ' + escape(item.title) + '</div>';
+                                            },
+                                            item: function(item, escape) {
+                                                return '<div>' + escape(item.memo_no) + '</div>';
+                                            }
+                                        },
                                         load: function(query, callback) {
                                             fetch(`/memos/search-picker?query=${encodeURIComponent(query)}&exclude=${$wire.editingMemoId ?? ''}`)
                                                 .then(res => res.json())
@@ -197,15 +205,23 @@
                             
                             {{-- Related memos --}}
                             <div>
-                                <label class="block font-medium mb-1 dark:text-white">Interconnected Memo(s)</label>
+                                <label class="block font-medium mb-1 dark:text-white">Other Related Memo(s)</label>
                                 <div wire:ignore x-data x-init="
                                     window.relatedTomSelect = new TomSelect($refs.relatedSelect, {
                                         plugins: ['remove_button'],
                                         valueField: 'id',
-                                        labelField: 'title',
-                                        searchField: 'title',
+                                        labelField: 'memo_no',
+                                        searchField: 'memo_no',
                                         create: false,
-                                        placeholder: 'Search memos to interconnect...',
+                                        placeholder: 'Search by memo no. to interconnect...',
+                                        render: {
+                                            option: function(item, escape) {
+                                                return '<div><strong>' + escape(item.memo_no) + '</strong> — ' + escape(item.title) + '</div>';
+                                            },
+                                            item: function(item, escape) {
+                                                return '<div>' + escape(item.memo_no) + '</div>';
+                                            }
+                                        },
                                         load: function(query, callback) {
                                             fetch(`/memos/search-picker?query=${encodeURIComponent(query)}&exclude=${$wire.editingMemoId ?? ''}`)
                                                 .then(res => res.json())
@@ -248,7 +264,6 @@
                             "
                         >
                             <label
-                                id="dropZone"
                                 for="memoFile"
                                 class="
                                     block border-2 border-dashed rounded-xl
@@ -257,7 +272,8 @@
                                     transition
                                     hover:border-indigo-500
                                     hover:bg-slate-800/20
-                                ">
+                                "
+                            >
 
                                 <input
                                     x-ref="file"
@@ -265,52 +281,117 @@
                                     type="file"
                                     wire:model="file"
                                     class="hidden"
-                                    accept="application/pdf">
+                                    accept="application/pdf"
+                                >
 
-                               @if(!$file)
-                                    <i class="ri-file-pdf-2-line text-5xl text-red-500"></i>
+                                {{-- Normal state --}}
+                                <div
+                                    wire:loading.remove
+                                    wire:target="file"
+                                    class="w-full flex flex-col items-center justify-center"
+                                >
+                                    @if(!$file && !$existingFileName)
+                                        <i class="ri-file-pdf-2-line text-5xl text-red-500"></i>
+                                        <p class="mt-3 text-xl">Drag & Drop PDF</p>
+                                        <p class="text-slate-400">or click to browse</p>
+                                    @endif
 
-                                    <p class="mt-3 text-xl">Drag & Drop PDF</p>
-                                    <p class="text-slate-400">or click to browse</p>
-                                @endif
+                                    @if($file)
+                                        <div class="mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-emerald-50 border border-emerald-300 text-emerald-800 dark:bg-emerald-950/40 dark:border-emerald-700 dark:text-emerald-300">
+                                            <i class="ri-file-pdf-line text-red-500"></i>
 
-                                @if($file)
-                                    <div class="mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-emerald-900/20 border border-emerald-700 text-green-400">
-                                        <i class="ri-file-pdf-line text-red-500"></i>
+                                            <span class="font-medium">
+                                                {{ $file->getClientOriginalName() }}
+                                            </span>
 
-                                        <span>{{ $file->getClientOriginalName() }}</span>
+                                            <button
+                                                type="button"
+                                                wire:click="removeFile"
+                                                class="text-red-500 hover:text-red-600 dark:text-red-400 dark:hover:text-red-300 transition"
+                                                title="Remove file"
+                                            >
+                                                <i class="ri-close-circle-fill text-lg"></i>
+                                            </button>
+                                        </div>
+                                    @elseif($existingFileName)
+                                        <div class="mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-slate-100 border border-slate-300 text-slate-700 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-300">
+                                            <i class="ri-file-pdf-line text-red-500"></i>
 
-                                        <button
-                                            type="button"
-                                            wire:click="removeFile"
-                                            class="text-red-400 hover:text-red-300 transition"
-                                            title="Remove file">
-                                            <i class="ri-close-circle-fill text-lg"></i>
-                                        </button>
+                                            <span class="font-medium">
+                                                {{ $existingFileName }}
+                                            </span>
+                                        </div>
+                                    @endif
+                                </div>
+
+                                {{-- Uploading state --}}
+                                <div
+                                    wire:loading
+                                    wire:target="file"
+                                    class="w-full py-6"
+                                >
+                                    <div class="w-full max-w-2xl mx-auto flex flex-col items-center">
+
+                                        <svg
+                                            class="animate-spin h-9 w-9 text-blue-600 mb-3"
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            fill="none"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <circle
+                                                class="opacity-25"
+                                                cx="12"
+                                                cy="12"
+                                                r="10"
+                                                stroke="currentColor"
+                                                stroke-width="4"
+                                            ></circle>
+
+                                            <path
+                                                class="opacity-75"
+                                                fill="currentColor"
+                                                d="M4 12a8 8 0 018-8v8H4z"
+                                            ></path>
+                                        </svg>
+
+                                        <p class="text-slate-500 dark:text-slate-400 text-sm mb-3">
+                                            Uploading file...
+                                        </p>
+
+                                        <div
+                                            x-data="{ progress: 0 }"
+                                            x-on:livewire-upload-start="progress = 0"
+                                            x-on:livewire-upload-progress="progress = $event.detail.progress"
+                                            x-on:livewire-upload-finish="progress = 100"
+                                            x-on:livewire-upload-error="progress = 0"
+                                            class="w-full"
+                                        >
+                                            <div class="w-full h-2 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden">
+                                                <div
+                                                    :style="`width: ${progress}%`"
+                                                    class="h-full bg-blue-600 rounded-full transition-all duration-150"
+                                                ></div>
+                                            </div>
+                                        </div>
+
                                     </div>
+                                </div>
 
-                                @elseif($existingFileName)
-                                    <div class="mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-slate-800 border border-slate-700 text-slate-300">
-                                        <i class="ri-file-pdf-line text-red-500"></i>
-
-                                        <span>{{ $existingFileName }}</span>
-                                    </div>
-                                @endif
                             </label>
                         </div>
 
-                        <div class="flex justify-end gap-2 pt-4 border-t border-gray-100 dark:border-slate-700 mt-2">
-                            <button type="button" wire:click="closeModal" class="px-4 py-2 rounded border hover:bg-gray-50 dark:hover:bg-slate-800 dark:text-white transition">Cancel</button>
-                            <button type="submit" class="px-4 py-2 rounded bg-blue-600 hover:bg-blue-700 text-white transition" wire:loading.attr="disabled" wire:target="save">
-                                {{ $editingMemoId ? 'Update' : 'Upload' }}
-                            </button>
+                                                <div class="flex justify-end gap-2 pt-4 border-t border-gray-100 dark:border-slate-700 mt-2">
+                                                    <button type="button" wire:click="closeModal" class="px-4 py-2 rounded border hover:bg-gray-50 dark:hover:bg-slate-800 dark:text-white transition">Cancel</button>
+                                                    <button type="submit" class="px-4 py-2 rounded bg-blue-600 hover:bg-blue-700 text-white transition" wire:loading.attr="disabled" wire:target="save">
+                                                        {{ $editingMemoId ? 'Update' : 'Upload' }}
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            @endif
                         </div>
-                    </div>
-                </form>
-            </div>
-        </div>
-    @endif
-</div>
 
 <script>
 document.addEventListener('livewire:init', () => {

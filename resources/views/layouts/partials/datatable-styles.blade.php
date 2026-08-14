@@ -114,6 +114,13 @@
         border-color: #334155;
     }
 
+    .dark .dataTables_length select {
+        background-color: #1e293b !important;
+        color: white !important;
+        border-color: #334155 !important;
+        background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2'%3e%3cpath d='M6 9l6 6 6-6'/%3e%3c/svg%3e") !important;
+    }
+
     .dataTables_wrapper .dataTables_paginate {
         display: flex;
         align-items: center;

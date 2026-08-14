@@ -132,12 +132,17 @@ class MemoController extends Controller
                     return "<div class='flex flex-wrap gap-1.5 max-w-[200px]'>{$pills}</div>";
                 })
                 ->addColumn('department_list', function ($memo) {
-                    if ($memo->for_all_departments) {
-                        return "<span class='inline-flex items-center rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-400 dark:border-emerald-900/50 px-2.5 py-0.5 text-xs font-medium'>All</span>";
+                    static $totalDepartmentCount = null;
+                    if ($totalDepartmentCount === null) {
+                        $totalDepartmentCount = Department::count();
                     }
 
                     $departments = $memo->departments->pluck('name');
                     $total = $departments->count();
+
+                    if ($memo->for_all_departments || ($totalDepartmentCount > 0 && $total === $totalDepartmentCount)) {
+                        return "<span class='inline-flex items-center rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-400 dark:border-emerald-900/50 px-2.5 py-0.5 text-xs font-medium'>All</span>";
+                    }
 
                     $pills = $departments->take(2)->map(fn($name) => 
                         "<span class='inline-flex items-center rounded-full bg-slate-100 text-slate-800 border border-slate-200 dark:bg-slate-800 dark:text-slate-100 dark:border-slate-700 px-2.5 py-0.5 text-xs font-medium whitespace-nowrap'>" . e($name) . "</span>"
@@ -351,14 +356,14 @@ class MemoController extends Controller
         $query = Memo::query();
 
         if($search = $request->get('query')){
-            $query->where('title', 'like', "%{$search}%");
+            $query->where('memo_no', 'like', "%{$search}%");
         }
 
         if($exclude = $request->get('exclude')){
             $query->where('id', '!=', $exclude);
         }
 
-        return $query->select('id', 'title')->limit(20)->get();
+        return $query->select('id', 'title', 'memo_no')->limit(20)->get();
     }
 
     public function archive(Request $request, $id)
@@ -424,12 +429,17 @@ class MemoController extends Controller
                         )->join(' ');
                 })
                 ->addColumn('department_list', function ($memo) {
-                    if ($memo->for_all_departments) {
-                        return "<span class='inline-flex items-center rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-400 dark:border-emerald-900/50 px-2.5 py-0.5 text-xs font-medium'>All</span>";
+                    static $totalDepartmentCount = null;
+                    if ($totalDepartmentCount === null) {
+                        $totalDepartmentCount = Department::count();
                     }
 
                     $departments = $memo->departments->pluck('name');
                     $total = $departments->count();
+
+                    if ($memo->for_all_departments || ($totalDepartmentCount > 0 && $total === $totalDepartmentCount)) {
+                        return "<span class='inline-flex items-center rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-400 dark:border-emerald-900/50 px-2.5 py-0.5 text-xs font-medium'>All</span>";
+                    }
 
                     $pills = $departments->take(2)->map(fn($name) => 
                         "<span class='inline-flex items-center rounded-full bg-slate-100 text-slate-800 border border-slate-200 dark:bg-slate-800 dark:text-slate-100 dark:border-slate-700 px-2.5 py-0.5 text-xs font-medium whitespace-nowrap'>" . e($name) . "</span>"
